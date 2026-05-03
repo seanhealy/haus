@@ -1,5 +1,5 @@
+import Image from "next/image";
 import type { HomeConfig, QuickLink } from "../types";
-import { SearchBox } from "./SearchBox";
 
 type Props = {
 	config: HomeConfig;
@@ -18,11 +18,43 @@ function QuickLinks({ links }: QuickLinksProps) {
 		<nav className="quicklinks" aria-label="Quick links">
 			{links.map((link) => (
 				<a className="quicklink" key={link.url} href={link.url}>
-					{link.label}
+					<span className="quicklink-icon-wrap">
+						<span
+							className="quicklink-icon-tile"
+							style={
+								link.icon?.backgroundColor
+									? { background: link.icon.backgroundColor }
+									: undefined
+							}
+						>
+							<Image
+								className="quicklink-icon"
+								src={iconUrlFor(link.url)}
+								alt=""
+								width={64}
+								height={64}
+								unoptimized
+								style={
+									link.icon?.scale
+										? { transform: `scale(${link.icon.scale})` }
+										: undefined
+								}
+							/>
+						</span>
+					</span>
+					<span className="quicklink-label">{link.label}</span>
 				</a>
 			))}
 		</nav>
 	);
+}
+
+function iconUrlFor(linkUrl: string): string {
+	try {
+		return `https://icon.horse/icon/${new URL(linkUrl).host}`;
+	} catch {
+		return "";
+	}
 }
 
 export function Homepage({ config }: Props) {
@@ -34,21 +66,11 @@ export function Homepage({ config }: Props) {
 	return (
 		<div className="hp-root">
 			<div className="hp-bg" style={bgStyle} />
-			<div
-				className="hp-overlay"
-				style={{
-					backgroundColor: config.background.overlayColor ?? "rgba(0,0,0,0.35)",
-				}}
-			/>
 			<main className="hp-content">
 				<header className="hp-header">
 					<h1 className="hp-title">Welcome</h1>
 					<p className="hp-sub">Start your session</p>
 				</header>
-
-				<section className="hp-search">
-					<SearchBox searchConfig={config.search} />
-				</section>
 
 				<section className="hp-links">
 					<QuickLinks links={config.quickLinks} />
