@@ -1,90 +1,143 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with
-[`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Haus — Personal Homepage Builder
 
-## Getting Started
+A small configurable homepage built with Next.js (App Router, TypeScript). This
+project provides a simple, self-hosted start page with:
 
-First, run the development server:
+- Full-bleed configurable background image
+- Autofocus search box that sends queries to Kagi
+- Configurable quick links
+- Configuration stored in JSON (for now)
+- Self-hosted iA Writer Quattro webfonts (optional)
+
+This README documents how to run, configure, and extend the homepage.
+
+---
+
+## Quick start
+
+From the project root (`haus`):
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the
-result.
+Open http://localhost:3000 to view the homepage.
 
-You can start editing the page by modifying `app/page.tsx`. The page
-auto-updates as you edit the file.
+---
 
-This project uses
-[`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts)
-to automatically optimize and load [Geist](https://vercel.com/font), a new font
-family for Vercel.
+## Where configuration lives
 
-## Learn More
+The homepage reads its configuration from `src/config/home.json` at build /
+request time on the server, so changes show up on the next request without a
+client-side fetch or loading flash. Example fields:
 
-To learn more about Next.js, take a look at the following resources:
+- `background.image` — URL or local `public/` path to the background image
+- `background.overlayColor` — CSS color for the overlay
+- `background.position` — CSS `background-position`
+- `quickLinks` — array of `{ label, url }`
+- `search.engine` — `kagi` (currently wired to Kagi)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Example config (already present at `src/config/home.json`):
 
-You can check out
-[the Next.js GitHub repository](https://github.com/vercel/next.js) - your
-feedback and contributions are welcome!
+```src/config/home.json#L1-40
+{
+	"background": {
+		"image": "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1950&q=80",
+		"overlayColor": "rgba(0, 0, 0, 0.35)",
+		"position": "center center"
+	},
+	"quickLinks": [
+		{
+			"label": "Inbox",
+			"url": "https://mail.google.com"
+		},
+		{
+			"label": "GitHub",
+			"url": "https://github.com"
+		},
+		{
+			"label": "Docs",
+			"url": "https://example.com/docs"
+		}
+	],
+	"search": {
+		"engine": "kagi"
+	}
+}
+```
 
-## Deploy on Vercel
+Edit this file to change the background, quick links, or search behavior.
 
-The easiest way to deploy your Next.js app is to use the
-[Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)
-from the creators of Next.js.
+---
 
-Check out our
-[Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying)
-for more details.
+## Fonts
 
-## Project Setup
+The project is configured to use iA Writer Quattro as a self-hosted font. Font
+files are colocated with the layout at `src/app/fonts/` and loaded with
+`next/font/local` (paths in `localFont` resolve relative to the calling file).
 
-This project was scaffolded with
-[`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app)
-and customized with `setup-next.js` using the following choices:
+Files included:
 
-| Category             | Choice                                                                          |
-| -------------------- | ------------------------------------------------------------------------------- |
-| Language             | TypeScript                                                                      |
-| Linter               | [Biome](https://biomejs.dev/)                                                   |
-| React Compiler       | Enabled                                                                         |
-| CSS                  | CSS Modules (Tailwind opt-out)                                                  |
-| Project structure    | `src/` directory                                                                |
-| Router               | App Router                                                                      |
-| Import alias         | `@/*`                                                                           |
-| Database             | [Neon](https://neon.tech/) (Serverless Postgres)                                |
-| ORM                  | [Drizzle ORM](https://orm.drizzle.team/)                                        |
-| Testing              | [Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/) |
-| Formatter (MD/HTML)  | [Prettier](https://prettier.io/) (tabs, 80 col)                                 |
-| Node version manager | [Volta](https://volta.sh/)                                                      |
-| Editor               | [Zed](https://zed.dev/) settings included                                       |
+- `src/app/fonts/iawriter-quattro-400.woff2`
+- `src/app/fonts/iawriter-quattro-700.woff2`
 
-### Available Scripts
+Upstream:
+https://github.com/iaolo/iA-Fonts/tree/master/iA%20Writer%20Quattro/Webfonts
 
-| Command               | Description                             |
-| --------------------- | --------------------------------------- |
-| `npm run dev`         | Start dev server (Turbopack)            |
-| `npm run build`       | Production build                        |
-| `npm run start`       | Start production server                 |
-| `npm run lint`        | Check with Biome + Prettier             |
-| `npm run format`      | Auto-fix with Biome                     |
-| `npm run lint:fix`    | Auto-fix with Biome + Prettier          |
-| `npm run db:generate` | Generate migrations from schema         |
-| `npm run db:migrate`  | Run pending migrations                  |
-| `npm run db:push`     | Push schema directly (dev shortcut)     |
-| `npm run db:studio`   | Open Drizzle Studio (visual DB browser) |
-| `npm run test`        | Run tests once                          |
-| `npm run test:watch`  | Run tests in watch mode                 |
-| `npm run typecheck`   | TypeScript type check (no emit)         |
-| `npm run verify`      | Run tests + lint:fix + typecheck in one |
+If you want more weights or italics, download them from upstream and drop them
+into `src/app/fonts/`, then add the corresponding entries to the `src` array in
+`src/app/layout.tsx`.
+
+---
+
+## Code layout (relevant files)
+
+- `src/app/page.tsx` — server entry; imports the config and renders the homepage
+- `src/app/components/Homepage.tsx` — main UI (server component)
+- `src/app/components/SearchBox.tsx` — search form (client component for
+  autofocus)
+- `src/app/globals.css` — global styles including the homepage layout and
+  background handling
+- `src/config/home.json` — configuration for the homepage
+- `src/app/fonts/` — self-hosted iA Writer Quattro `.woff2` files
+
+---
+
+## Development notes
+
+- Search submits to Kagi at `https://kagi.com/search?q=...` in the current tab.
+  Quick links also open in the current tab.
+- The search input is focused programmatically on mount (no `autoFocus`
+  attribute) to satisfy linter rules.
+- The background supports local files (place images under `public/images/`) or
+  remote URLs.
+
+---
+
+## Next enhancements (ideas)
+
+- Small local admin UI to edit `src/config/home.json` in-browser and persist to
+  disk
+- Persist configuration to Neon + Drizzle and add a repository abstraction
+- Keyboard shortcuts (e.g., `g` to focus search, `1..9` to open quick links)
+- Add optional Google Fonts fallback if local fonts are missing
+
+If you'd like one of those implemented, tell me which and I'll add it.
+
+---
+
+## Available scripts
+
+See `package.json` — typical Next.js scripts are available:
+
+- `npm run dev` — start dev server
+- `npm run build` — build for production
+- `npm run start` — start production server
+- `npm run verify` — run tests + lint + typecheck
+
+---
+
+If you want the README to include screenshots or more detailed instructions (for
+example a quick guide to editing JSON or adding images), say the word and I’ll
+add them.

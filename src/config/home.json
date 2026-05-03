@@ -1,0 +1,24 @@
+{
+	"background": {
+		"image": "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1950&q=80",
+		"overlayColor": "rgba(0, 0, 0, 0.35)",
+		"position": "center center"
+	},
+	"quickLinks": [
+		{
+			"label": "Inbox",
+			"url": "https://mail.google.com"
+		},
+		{
+			"label": "GitHub",
+			"url": "https://github.com"
+		},
+		{
+			"label": "Docs",
+			"url": "https://example.com/docs"
+		}
+	],
+	"search": {
+		"engine": "kagi"
+	}
+}
