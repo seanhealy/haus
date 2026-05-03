@@ -36,7 +36,8 @@ Stored in `homepages.config` as `jsonb`. Validated with Zod
 
 - `background.image` — http(s) URL for the background image
 - `quickLinks` — array of `{ label, url, icon? }`
-  - `url` must be `http://` or `https://` (other schemes are rejected for safety)
+  - `url` must be `http://` or `https://` (other schemes are rejected for
+    safety)
   - `icon.scale` (optional) — number applied as `transform: scale(...)` to the
     icon image inside the squircle tile. Use values >1 to zoom in on icons that
     arrive with built-in padding
@@ -55,12 +56,13 @@ site's `apple-touch-icon` and falls back to the favicon.
   - `created_at timestamptz NOT NULL DEFAULT now()`
   - `modified_at timestamptz NOT NULL DEFAULT now()` (Drizzle `$onUpdate` hook)
 
-All DB access goes through `src/db/repositories/homepages.ts`. Never import
-`db` directly in route handlers or components.
+All DB access goes through `src/db/repositories/homepages.ts`. Never import `db`
+directly in route handlers or components.
 
 ## Code layout
 
-- `src/app/[uuid]/page.tsx` — view route; validates uuid, fetches config, 404s otherwise
+- `src/app/[uuid]/page.tsx` — view route; validates uuid, fetches config, 404s
+  otherwise
 - `src/app/[uuid]/edit/page.tsx` — edit route (server)
 - `src/app/[uuid]/edit/actions.ts` — server action: zod-validates and persists
 - `src/app/[uuid]/edit/components/HomepageEditor.tsx` — client form

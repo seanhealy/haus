@@ -243,9 +243,7 @@ function QuickLinkRow({
 					<input
 						type="url"
 						value={link.url}
-						onChange={(event) =>
-							onChange({ ...link, url: event.target.value })
-						}
+						onChange={(event) => onChange({ ...link, url: event.target.value })}
 						onBlur={(event) =>
 							onChange({ ...link, url: normalizeUrl(event.target.value) })
 						}
