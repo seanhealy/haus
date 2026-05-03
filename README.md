@@ -1,151 +1,93 @@
 # Haus — Personal Homepage Builder
 
-A small configurable homepage built with Next.js (App Router, TypeScript). This
-project provides a simple, self-hosted start page with:
+A small configurable homepage built with Next.js (App Router, TypeScript), with
+configuration stored in Postgres (Neon) via Drizzle. Each homepage lives at
+`/<uuid>`; an editor lives at `/<uuid>/edit`.
 
 - Full-bleed configurable background image
 - Desktop-style quick links with auto-fetched site icons
-- Configuration stored in JSON (for now)
+- Configuration stored in Postgres as `jsonb`, looked up by uuid
 - Self-hosted iA Writer Quattro webfonts (optional)
-
-This README documents how to run, configure, and extend the homepage.
-
----
 
 ## Quick start
 
-From the project root (`haus`):
-
 ```bash
 npm install
+# set DATABASE_URL in .env.local (Neon connection string)
+npm run db:push        # apply schema to your database
+npm run page:new       # create a homepage row, prints "Created /<uuid>"
 npm run dev
 ```
 
-Open http://localhost:3000 to view the homepage.
+Visit the printed URL (e.g. `http://localhost:3000/<uuid>`) to view, and
+`/<uuid>/edit` to edit.
 
----
+## Access model
 
-## Where configuration lives
+The uuid is the only access control — anyone who knows the URL can both view
+**and** edit. Don't share view URLs with people you don't trust to also edit.
+For multi-user / public setups, plan to add an `edit_token` column or a real
+auth layer before sharing.
 
-The homepage reads its configuration from `src/config/home.json` at build /
-request time on the server, so changes show up on the next request without a
-client-side fetch or loading flash. Example fields:
+## Configuration shape
 
-- `background.image` — URL or local `public/` path to the background image
-- `background.position` — CSS `background-position`
-- `quickLinks` — array of `{ label, url, icon? }`. Icons are auto-fetched from
-  [icon.horse](https://icon.horse), which prefers a site's `apple-touch-icon`
-  (the high-resolution icon used for "Add to Home Screen") and falls back to the
-  favicon. Labels render as text on the background.
-  - `icon.scale` (optional) — a number applied as `transform: scale(...)` to the
+Stored in `homepages.config` as `jsonb`. Validated with Zod
+(`src/app/types.ts`). Shape:
+
+- `background.image` — http(s) URL for the background image
+- `quickLinks` — array of `{ label, url, icon? }`
+  - `url` must be `http://` or `https://` (other schemes are rejected for safety)
+  - `icon.scale` (optional) — number applied as `transform: scale(...)` to the
     icon image inside the squircle tile. Use values >1 to zoom in on icons that
-    arrive with built-in padding (e.g. Gmail's small M). The squircle tile stays
-    the same size; overflow is clipped by the mask.
-  - `icon.backgroundColor` (optional) — CSS color for the squircle tile.
-    Defaults to `rgba(255, 255, 255, 0.92)`. Set this when you want the tile to
-    match the icon's natural brand color (e.g. `"#FF6B35"` for an orange-branded
-    site whose icon has a transparent background).
+    arrive with built-in padding
+  - `icon.backgroundColor` (optional) — CSS color for the squircle tile
 
-Example config (already present at `src/config/home.json`):
+Icons are auto-fetched from [icon.horse](https://icon.horse), which prefers a
+site's `apple-touch-icon` and falls back to the favicon.
 
-```src/config/home.json#L1-40
-{
-	"background": {
-		"image": "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1950&q=80",
-		"position": "center center"
-	},
-	"quickLinks": [
-		{
-			"label": "Inbox",
-			"url": "https://mail.google.com",
-			"icon": { "scale": 1.4 }
-		},
-		{
-			"label": "GitHub",
-			"url": "https://github.com"
-		},
-		{
-			"label": "Kagi",
-			"url": "https://kagi.com",
-			"icon": { "backgroundColor": "#FFB319" }
-		}
-	]
-}
-```
+## Database
 
-Edit this file to change the background or quick links.
+- **Driver:** Neon serverless Postgres (`@neondatabase/serverless`)
+- **ORM:** Drizzle (`drizzle-orm`, `drizzle-kit`)
+- **Schema:** `src/db/schema.ts` — single `homepages` table:
+  - `id uuid PRIMARY KEY DEFAULT gen_random_uuid()`
+  - `config jsonb NOT NULL`
+  - `created_at timestamptz NOT NULL DEFAULT now()`
+  - `modified_at timestamptz NOT NULL DEFAULT now()` (Drizzle `$onUpdate` hook)
 
----
+All DB access goes through `src/db/repositories/homepages.ts`. Never import
+`db` directly in route handlers or components.
+
+## Code layout
+
+- `src/app/[uuid]/page.tsx` — view route; validates uuid, fetches config, 404s otherwise
+- `src/app/[uuid]/edit/page.tsx` — edit route (server)
+- `src/app/[uuid]/edit/actions.ts` — server action: zod-validates and persists
+- `src/app/[uuid]/edit/components/HomepageEditor.tsx` — client form
+- `src/app/components/Homepage.tsx` — homepage UI (server component)
+- `src/app/components/QuickLinkIcon.tsx` — shared icon-tile component used by
+  view and editor
+- `src/app/types.ts` — Zod schemas; types are inferred via `z.infer<>`
+- `src/app/globals.css` — global styles (homepage + editor)
+- `src/db/` — Drizzle schema, client, repositories
+- `src/utilities/isUuid.ts` — uuid format guard used before DB lookups
+- `scripts/createPage.mjs` — `npm run page:new`
 
 ## Fonts
 
-The project is configured to use iA Writer Quattro as a self-hosted font. Font
-files are colocated with the layout at `src/app/fonts/` and loaded with
-`next/font/local` (paths in `localFont` resolve relative to the calling file).
-
-Files included:
-
-- `src/app/fonts/iawriter-quattro-400.woff2`
-- `src/app/fonts/iawriter-quattro-700.woff2`
-
-Upstream:
-https://github.com/iaolo/iA-Fonts/tree/master/iA%20Writer%20Quattro/Webfonts
-
-If you want more weights or italics, download them from upstream and drop them
-into `src/app/fonts/`, then add the corresponding entries to the `src` array in
-`src/app/layout.tsx`.
-
----
-
-## Code layout (relevant files)
-
-- `src/app/page.tsx` — server entry; imports the config and renders the homepage
-- `src/app/components/Homepage.tsx` — main UI (server component)
-- `src/app/globals.css` — global styles including the homepage layout and
-  background handling
-- `src/config/home.json` — configuration for the homepage
-- `src/app/fonts/` — self-hosted iA Writer Quattro `.woff2` files
-
----
-
-## Development notes
-
-- Quick links open in the current tab. Use the browser's URL bar for search;
-  there's no in-page search box (rely on the address bar's keyword search / Kagi
-  integration / history completion).
-- The background supports local files (place images under `public/images/`) or
-  remote URLs.
-- Quick-link icons are fetched from `icon.horse/icon/{host}`. The service
-  prefers `apple-touch-icon` (typically a 180×180 PNG) and falls back to the
-  favicon, so most sites render crisply at 64px instead of pixelated. Icons
-  with built-in whitespace can be zoomed via `icon.scale`; the squircle tile
-  background is configurable per-link via `icon.backgroundColor`.
-
----
-
-## Next enhancements (ideas)
-
-- Small local admin UI to edit `src/config/home.json` in-browser and persist to
-  disk
-- Persist configuration to Neon + Drizzle and add a repository abstraction
-- Keyboard shortcuts (e.g., `1..9` to open quick links)
-- Add optional Google Fonts fallback if local fonts are missing
-
-If you'd like one of those implemented, tell me which and I'll add it.
-
----
+Self-hosted iA Writer Quattro at `src/app/fonts/`, loaded via `next/font/local`
+in `src/app/layout.tsx`. Add more weights/italics from
+[upstream](https://github.com/iaolo/iA-Fonts/tree/master/iA%20Writer%20Quattro/Webfonts)
+and register them in the layout.
 
 ## Available scripts
 
-See `package.json` — typical Next.js scripts are available:
-
 - `npm run dev` — start dev server
-- `npm run build` — build for production
+- `npm run build` — production build
 - `npm run start` — start production server
-- `npm run verify` — run tests + lint + typecheck
-
----
-
-If you want the README to include screenshots or more detailed instructions (for
-example a quick guide to editing JSON or adding images), say the word and I’ll
-add them.
+- `npm run verify` — tests + lint:fix + typecheck
+- `npm run db:generate` — generate migrations from schema
+- `npm run db:migrate` — apply pending migrations
+- `npm run db:push` — push schema directly (dev shortcut)
+- `npm run db:studio` — visual DB browser
+- `npm run page:new` — create a new homepage row, prints its URL

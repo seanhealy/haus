@@ -1,24 +1,16 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Homepage } from "@/app/components/Homepage";
 import { HomepageRepository } from "@/db/repositories";
 import { isUuid } from "@/utilities/isUuid";
+import { HomepageEditor } from "./components/HomepageEditor";
 
 type Props = {
 	params: Promise<{ uuid: string }>;
 };
 
-export default async function App({ params }: Props) {
+export default async function EditPage({ params }: Props) {
 	const { uuid } = await params;
 	if (!isUuid(uuid)) notFound();
 	const config = await HomepageRepository.findById(uuid);
 	if (!config) notFound();
-	return (
-		<>
-			<Homepage config={config} />
-			<Link className="hp-edit-link" href={`/${uuid}/edit`}>
-				edit
-			</Link>
-		</>
-	);
+	return <HomepageEditor uuid={uuid} initial={config} />;
 }

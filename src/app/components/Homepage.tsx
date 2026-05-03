@@ -1,5 +1,5 @@
-import Image from "next/image";
 import type { HomeConfig, QuickLink } from "../types";
+import { QuickLinkIcon } from "./QuickLinkIcon";
 
 type Props = {
 	config: HomeConfig;
@@ -18,44 +18,12 @@ function QuickLinks({ links }: QuickLinksProps) {
 		<nav className="quicklinks" aria-label="Quick links">
 			{links.map((link) => (
 				<a className="quicklink" key={link.url} href={link.url}>
-					<span className="quicklink-icon-wrap">
-						<span
-							className="quicklink-icon-tile"
-							style={
-								link.icon?.backgroundColor
-									? { background: link.icon.backgroundColor }
-									: undefined
-							}
-						>
-							<Image
-								className="quicklink-icon"
-								src={iconUrlFor(link.url)}
-								alt=""
-								width={64}
-								height={64}
-								unoptimized
-								loading="eager"
-								style={
-									link.icon?.scale
-										? { transform: `scale(${link.icon.scale})` }
-										: undefined
-								}
-							/>
-						</span>
-					</span>
+					<QuickLinkIcon url={link.url} icon={link.icon} loading="eager" />
 					<span className="quicklink-label">{link.label}</span>
 				</a>
 			))}
 		</nav>
 	);
-}
-
-function iconUrlFor(linkUrl: string): string {
-	try {
-		return `https://icon.horse/icon/${new URL(linkUrl).host}`;
-	} catch {
-		return "";
-	}
 }
 
 export function Homepage({ config }: Props) {

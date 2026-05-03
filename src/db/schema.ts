@@ -1,14 +1,14 @@
-// Define your database tables here.
-// See https://orm.drizzle.team/docs/sql-schema-declaration
+import { jsonb, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+import type { HomeConfig } from "@/app/types";
 
-// Example:
-// import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
-//
-// export const users = pgTable("users", {
-// 	id: serial("id").primaryKey(),
-// 	name: text("name").notNull(),
-// 	email: text("email").notNull().unique(),
-// 	createdAt: timestamp("created_at").defaultNow().notNull(),
-// });
-
-export {};
+export const homepages = pgTable("homepages", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	config: jsonb("config").$type<HomeConfig>().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.defaultNow()
+		.notNull(),
+	modifiedAt: timestamp("modified_at", { withTimezone: true })
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
+});
