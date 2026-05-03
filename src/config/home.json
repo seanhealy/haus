@@ -1,17 +1,18 @@
 {
-	"background": {
-		"image": "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1950&q=80",
-		"position": "center center"
-	},
-	"quickLinks": [
-		{
-			"label": "Assistant",
-			"url": "https://kagi.com/assistant"
+	"d290f1ee-6c54-4b01-90e6-d701748f0851": {
+		"background": {
+			"image": "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1950&q=80"
 		},
-		{
-			"label": "GitHub",
-			"url": "https://github.com",
-			"icon": { "scale": 0.8, "backgroundColor": "#f3f6f8" }
-		}
-	]
+		"quickLinks": [
+			{
+				"label": "Assistant",
+				"url": "https://kagi.com/assistant"
+			},
+			{
+				"label": "GitHub",
+				"url": "https://github.com",
+				"icon": { "scale": 0.8, "backgroundColor": "#f3f6f8" }
+			}
+		]
+	}
 }

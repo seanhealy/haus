@@ -73,6 +73,7 @@ a {
 	z-index: 0;
 	background-repeat: no-repeat;
 	background-size: cover;
+	background-position: center;
 	filter: saturate(105%) contrast(100%);
 }
 
@@ -120,24 +121,15 @@ a {
 	width: 96px;
 	color: var(--accent);
 	text-decoration: none;
-	transition:
-		transform 0.12s ease,
-		filter 0.12s ease;
-}
-
-.quicklink:hover {
-	filter: brightness(1.05);
-	transform: translateY(-3px);
 }
 
 .quicklink-icon-wrap {
 	display: inline-block;
 	filter: drop-shadow(var(--shadow-elevation));
-	transition: filter 0.12s ease;
 }
 
-.quicklink:hover .quicklink-icon-wrap {
-	filter: drop-shadow(var(--shadow-elevation-hover));
+.quicklink:hover .quicklink-label {
+	text-decoration: underline;
 }
 
 .quicklink-icon-tile {

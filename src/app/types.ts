@@ -1,6 +1,5 @@
 export type BackgroundConfig = {
 	image: string;
-	position?: string;
 };
 
 export type QuickLinkIcon = {
@@ -18,3 +17,5 @@ export type HomeConfig = {
 	background: BackgroundConfig;
 	quickLinks: QuickLink[];
 };
+
+export type HomeConfigMap = Record<string, HomeConfig>;

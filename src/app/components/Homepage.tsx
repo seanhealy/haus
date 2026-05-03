@@ -34,6 +34,7 @@ function QuickLinks({ links }: QuickLinksProps) {
 								width={64}
 								height={64}
 								unoptimized
+								loading="eager"
 								style={
 									link.icon?.scale
 										? { transform: `scale(${link.icon.scale})` }
@@ -60,7 +61,6 @@ function iconUrlFor(linkUrl: string): string {
 export function Homepage({ config }: Props) {
 	const bgStyle = {
 		backgroundImage: `url(${config.background.image})`,
-		backgroundPosition: config.background.position ?? "center center",
 	};
 
 	return (
