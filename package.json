@@ -1,0 +1,51 @@
+{
+	"name": "haus",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "biome check && npm run prettier:check",
+		"format": "biome check --write",
+		"prettier:check": "prettier --check --cache .",
+		"prettier:fix": "prettier --write --cache .",
+		"lint:fix": "biome check --write && npm run prettier:fix",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"typecheck": "tsc --noEmit",
+		"verify": "npm run test && npm run lint:fix && npm run typecheck"
+	},
+	"dependencies": {
+		"@neondatabase/serverless": "^1.1.0",
+		"@next/env": "^16.2.4",
+		"drizzle-orm": "^0.45.2",
+		"next": "16.2.4",
+		"react": "19.2.4",
+		"react-dom": "19.2.4"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.0",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.2",
+		"@testing-library/user-event": "^14.6.1",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"@vitejs/plugin-react": "^6.0.1",
+		"babel-plugin-react-compiler": "1.0.0",
+		"drizzle-kit": "^0.31.10",
+		"jsdom": "^29.1.1",
+		"prettier": "^3.8.3",
+		"typescript": "^5",
+		"vitest": "^4.1.5"
+	},
+	"volta": {
+		"node": "24.10.0",
+		"npm": "11.6.2"
+	}
+}
