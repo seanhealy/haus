@@ -1,5 +1,7 @@
 export {
 	CheckIcon,
+	ChevronDownIcon,
+	ChevronUpIcon,
 	GripIcon,
 	PencilIcon,
 	PlusIcon,

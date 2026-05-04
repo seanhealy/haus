@@ -1,5 +1,36 @@
 .editable {
 	position: relative;
+	animation: wiggle1 0.45s ease-in-out infinite;
+}
+
+.editable:nth-child(2n) {
+	animation-name: wiggle2;
+}
+
+@keyframes wiggle1 {
+	0%,
+	100% {
+		rotate: -0.8deg;
+	}
+	50% {
+		rotate: 0.8deg;
+	}
+}
+
+@keyframes wiggle2 {
+	0%,
+	100% {
+		rotate: 0.8deg;
+	}
+	50% {
+		rotate: -0.8deg;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.editable {
+		animation: none;
+	}
 }
 
 .tileButton {
@@ -15,40 +46,25 @@
 	border: none;
 }
 
-.dragHandle,
 .editButton {
-	position: absolute;
-	top: -2px;
-	z-index: 2;
-	display: flex;
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	padding: 0;
-	color: var(--muted);
+	margin-left: 0.25rem;
+	vertical-align: middle;
+	color: var(--onSurface);
+	cursor: pointer;
 	background: none;
 	border: none;
-	filter: drop-shadow(var(--shadow-text));
-}
-
-.dragHandle {
-	left: -2px;
-	cursor: grab;
-}
-
-.dragHandle:active {
-	cursor: grabbing;
-}
-
-.editButton {
-	right: -2px;
-	cursor: pointer;
+	filter: drop-shadow(var(--shadow));
 }
 
 .editButton:hover {
-	color: var(--accent);
+	color: var(--onSurface);
 }
 
 .labelPlaceholder {
 	font-style: italic;
-	color: color-mix(in srgb, var(--accent) 50%, transparent);
+	color: color-mix(in srgb, var(--onSurface) 50%, transparent);
 }

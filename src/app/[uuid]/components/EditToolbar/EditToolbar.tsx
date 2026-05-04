@@ -29,9 +29,9 @@ export function EditToolbar({
 	error,
 }: Props) {
 	return (
-		<div className={styles.toolbar} role="toolbar" aria-label="Edit toolbar">
+		<>
 			<label className={styles.field}>
-				<span>Background</span>
+				<span>PageBackground</span>
 				<input
 					type="text"
 					value={backgroundImage}
@@ -42,24 +42,26 @@ export function EditToolbar({
 				/>
 			</label>
 			{error ? <span className={styles.error}>{error}</span> : null}
-			<button
-				type="button"
-				className={styles.button}
-				onClick={onDiscard}
-				disabled={isPending}
-				aria-label="Discard changes"
-			>
-				<XIcon />
-			</button>
-			<button
-				type="button"
-				className={`${styles.button} ${styles.save}`}
-				onClick={onSave}
-				disabled={isPending}
-				aria-label="Save changes"
-			>
-				<CheckIcon />
-			</button>
-		</div>
+			<div className={styles.actions}>
+				<button
+					type="button"
+					className={styles.button}
+					onClick={onDiscard}
+					disabled={isPending}
+					aria-label="Discard changes"
+				>
+					<XIcon />
+				</button>
+				<button
+					type="button"
+					className={styles.button}
+					onClick={onSave}
+					disabled={isPending}
+					aria-label="Save changes"
+				>
+					<CheckIcon />
+				</button>
+			</div>
+		</>
 	);
 }

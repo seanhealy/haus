@@ -1,18 +1,12 @@
-import {
-	rectSortingStrategy,
-	SortableContext,
-	useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { QuickLinkIcon } from "@/app/components/QuickLinkIcon";
 import type { QuickLink, Section } from "@/app/types";
 import { EditableLinkTile } from "../EditableLinkTile";
 import { EditableText } from "../EditableText";
-import { GripIcon, PlusIcon, XIcon } from "../icons";
+import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon } from "../icons";
 import styles from "./styles.module.css";
 
 type Props = {
-	id: string;
 	section: Section;
 	linkKeys: string[];
 	isEdit: boolean;
@@ -21,10 +15,13 @@ type Props = {
 	onRemoveLink: (linkIndex: number) => void;
 	onUpdateLink: (linkIndex: number, next: QuickLink) => void;
 	onRemoveSection: () => void;
+	onMoveUp: () => void;
+	onMoveDown: () => void;
+	canMoveUp: boolean;
+	canMoveDown: boolean;
 };
 
 export function SectionView({
-	id,
 	section,
 	linkKeys,
 	isEdit,
@@ -33,17 +30,14 @@ export function SectionView({
 	onRemoveLink,
 	onUpdateLink,
 	onRemoveSection,
+	onMoveUp,
+	onMoveDown,
+	canMoveUp,
+	canMoveDown,
 }: Props) {
-	const sortable = useSortable({ id, disabled: !isEdit });
-	const style = {
-		transform: CSS.Transform.toString(sortable.transform),
-		transition: sortable.transition,
-		opacity: sortable.isDragging ? 0.5 : 1,
-	};
-
 	if (!isEdit) {
 		return section.label ? (
-			<details className={styles.section} open ref={sortable.setNodeRef}>
+			<details className={styles.section} open>
 				<summary className={`${styles.label} ${styles.summary}`}>
 					{section.label}
 				</summary>
@@ -57,7 +51,7 @@ export function SectionView({
 				/>
 			</details>
 		) : (
-			<section className={styles.section} ref={sortable.setNodeRef}>
+			<section className={styles.section}>
 				<SectionLinks
 					section={section}
 					linkKeys={linkKeys}
@@ -71,27 +65,32 @@ export function SectionView({
 	}
 
 	return (
-		<section
-			className={`${styles.section} ${styles.editing}`}
-			ref={sortable.setNodeRef}
-			style={style}
-			{...sortable.attributes}
-		>
+		<section className={`${styles.section} ${styles.editing}`}>
 			<div className={styles.head}>
-				<button
-					type="button"
-					className={styles.dragHandle}
-					{...sortable.listeners}
-					aria-label="Drag section"
-				>
-					<GripIcon />
-				</button>
 				<EditableText
 					className={styles.label}
 					value={section.label}
 					placeholder="Section name"
 					onChange={onLabelChange}
 				/>
+				<button
+					type="button"
+					className={styles.moveButton}
+					onClick={onMoveUp}
+					disabled={!canMoveUp}
+					aria-label="Move section up"
+				>
+					<ChevronUpIcon size={18} />
+				</button>
+				<button
+					type="button"
+					className={styles.moveButton}
+					onClick={onMoveDown}
+					disabled={!canMoveDown}
+					aria-label="Move section down"
+				>
+					<ChevronDownIcon size={18} />
+				</button>
 				<button
 					type="button"
 					className={styles.remove}

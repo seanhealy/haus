@@ -21,6 +21,9 @@
 			"recommended": true,
 			"suspicious": {
 				"noDuplicateTestHooks": "off"
+			},
+			"a11y": {
+				"useSemanticElements": "off"
 			}
 		},
 		"domains": {

@@ -8,9 +8,9 @@
 	margin: 0;
 	font-size: 1rem;
 	font-weight: 600;
-	color: var(--muted);
+	color: var(--onSurface);
 	text-align: left;
-	text-shadow: var(--shadow-text);
+	text-shadow: var(--shadow);
 }
 
 .summary {
@@ -20,10 +20,6 @@
 
 .section.editing {
 	gap: 0.5rem;
-	padding: 0.75rem;
-	background: color-mix(in srgb, #000 15%, transparent);
-	border: 1px dashed color-mix(in srgb, var(--accent) 35%, transparent);
-	border-radius: 10px;
 }
 
 .head {
@@ -36,28 +32,30 @@
 	flex: 1;
 }
 
-.dragHandle,
+.moveButton,
 .remove {
 	display: flex;
+	flex-shrink: 0;
 	align-items: center;
 	justify-content: center;
+	width: 32px;
+	height: 32px;
 	padding: 0;
-	color: var(--muted);
+	color: var(--onSurface);
 	cursor: pointer;
 	background: none;
 	border: none;
+	filter: drop-shadow(var(--shadow));
 }
 
-.dragHandle {
-	cursor: grab;
+.moveButton:disabled {
+	cursor: default;
+	opacity: 0.35;
 }
 
-.dragHandle:active {
-	cursor: grabbing;
-}
-
+.moveButton:not(:disabled):hover,
 .remove:hover {
-	color: var(--accent);
+	color: var(--onSurface);
 }
 
 .quicklinks {
@@ -73,7 +71,7 @@
 	gap: 0.5rem;
 	align-items: center;
 	width: 96px;
-	color: var(--accent);
+	color: var(--onSurface);
 	text-decoration: none;
 }
 
@@ -82,7 +80,7 @@
 	line-height: 1.2;
 	text-align: center;
 	overflow-wrap: break-word;
-	text-shadow: var(--shadow-text);
+	text-shadow: var(--shadow);
 }
 
 .quicklink:hover .quicklinkLabel {
@@ -104,7 +102,7 @@
 	height: 64px;
 	color: color-mix(in srgb, #000 60%, transparent);
 	background: color-mix(in srgb, #fff 60%, transparent);
-	filter: drop-shadow(var(--shadow-elevation));
+	filter: drop-shadow(var(--shadow));
 	-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M 22,0 H 78 C 87.5,0 92.5,0.5 96,4 C 99.5,7.5 100,12.5 100,22 V 78 C 100,87.5 99.5,92.5 96,96 C 92.5,99.5 87.5,100 78,100 H 22 C 12.5,100 7.5,99.5 4,96 C 0.5,92.5 0,87.5 0,78 V 22 C 0,12.5 0.5,7.5 4,4 C 7.5,0.5 12.5,0 22,0 Z' fill='black'/></svg>");
 	mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M 22,0 H 78 C 87.5,0 92.5,0.5 96,4 C 99.5,7.5 100,12.5 100,22 V 78 C 100,87.5 99.5,92.5 96,96 C 92.5,99.5 87.5,100 78,100 H 22 C 12.5,100 7.5,99.5 4,96 C 0.5,92.5 0,87.5 0,78 V 22 C 0,12.5 0.5,7.5 4,4 C 7.5,0.5 12.5,0 22,0 Z' fill='black'/></svg>");
 	-webkit-mask-size: 100% 100%;

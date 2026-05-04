@@ -11,7 +11,7 @@ function Svg({
 			viewBox="0 0 24 24"
 			fill="none"
 			stroke="currentColor"
-			strokeWidth="2"
+			strokeWidth="2.5"
 			strokeLinecap="round"
 			strokeLinejoin="round"
 			aria-hidden="true"
@@ -52,6 +52,22 @@ export function PlusIcon(props: IconProps) {
 		<Svg {...props}>
 			<line x1="12" y1="5" x2="12" y2="19" />
 			<line x1="5" y1="12" x2="19" y2="12" />
+		</Svg>
+	);
+}
+
+export function ChevronUpIcon(props: IconProps) {
+	return (
+		<Svg {...props}>
+			<polyline points="18 15 12 9 6 15" />
+		</Svg>
+	);
+}
+
+export function ChevronDownIcon(props: IconProps) {
+	return (
+		<Svg {...props}>
+			<polyline points="6 9 12 15 18 9" />
 		</Svg>
 	);
 }

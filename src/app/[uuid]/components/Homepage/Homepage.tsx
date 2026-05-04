@@ -10,11 +10,7 @@ import {
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
-import {
-	SortableContext,
-	sortableKeyboardCoordinates,
-	verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import type { HomeConfig, QuickLink } from "@/app/types";
 import { saveHomepage } from "../../actions";
@@ -235,13 +231,6 @@ export function Homepage({ uuid, initial }: Props) {
 		const activeId = String(active.id);
 		const overId = String(over.id);
 
-		const sectionFrom = sectionKeys.indexOf(activeId);
-		if (sectionFrom !== -1) {
-			const sectionTo = sectionKeys.indexOf(overId);
-			if (sectionTo !== -1) moveSection(sectionFrom, sectionTo);
-			return;
-		}
-
 		for (let s = 0; s < linkKeysBySection.length; s++) {
 			const linkFrom = linkKeysBySection[s].indexOf(activeId);
 			if (linkFrom !== -1) {
@@ -275,67 +264,63 @@ export function Homepage({ uuid, initial }: Props) {
 						collisionDetection={closestCenter}
 						onDragEnd={handleDragEnd}
 					>
-						<SortableContext
-							items={sectionKeys}
-							strategy={verticalListSortingStrategy}
-							disabled={!isEdit}
-						>
-							<div className={styles.sections}>
-								{config.sections.map((section, sectionIndex) => (
-									<SectionView
-										key={sectionKeys[sectionIndex]}
-										id={sectionKeys[sectionIndex]}
-										section={section}
-										linkKeys={linkKeysBySection[sectionIndex] ?? []}
-										isEdit={isEdit}
-										onLabelChange={(label) =>
-											updateSectionLabel(sectionIndex, label)
-										}
-										onAddLink={() => addLink(sectionIndex)}
-										onRemoveLink={(linkIndex) =>
-											removeLink(sectionIndex, linkIndex)
-										}
-										onUpdateLink={(linkIndex, next) =>
-											updateLink(sectionIndex, linkIndex, next)
-										}
-										onRemoveSection={() => removeSection(sectionIndex)}
-									/>
-								))}
-								{isEdit ? (
+						<div className={styles.sections}>
+							{config.sections.map((section, sectionIndex) => (
+								<SectionView
+									key={sectionKeys[sectionIndex]}
+									section={section}
+									linkKeys={linkKeysBySection[sectionIndex] ?? []}
+									isEdit={isEdit}
+									onLabelChange={(label) =>
+										updateSectionLabel(sectionIndex, label)
+									}
+									onAddLink={() => addLink(sectionIndex)}
+									onRemoveLink={(linkIndex) =>
+										removeLink(sectionIndex, linkIndex)
+									}
+									onUpdateLink={(linkIndex, next) =>
+										updateLink(sectionIndex, linkIndex, next)
+									}
+									onRemoveSection={() => removeSection(sectionIndex)}
+									onMoveUp={() => moveSection(sectionIndex, sectionIndex - 1)}
+									onMoveDown={() => moveSection(sectionIndex, sectionIndex + 1)}
+									canMoveUp={sectionIndex > 0}
+									canMoveDown={sectionIndex < config.sections.length - 1}
+								/>
+							))}
+							{isEdit ? (
+								<>
 									<button
 										type="button"
 										className={styles.addSection}
 										onClick={addSection}
 									>
-										<PlusIcon size={16} />
 										<span>Add section</span>
+										<PlusIcon size={16} />
 									</button>
-								) : null}
-							</div>
-						</SortableContext>
+									<EditToolbar
+										backgroundImage={config.background.image}
+										onBackgroundChange={updateBackgroundImage}
+										onDiscard={discard}
+										onSave={save}
+										isPending={isPending}
+										error={error}
+									/>
+								</>
+							) : (
+								<button
+									type="button"
+									className={styles.editLink}
+									onClick={enterEdit}
+									aria-label="Edit"
+								>
+									<PencilIcon />
+								</button>
+							)}
+						</div>
 					</DndContext>
 				</section>
 			</main>
-
-			{isEdit ? (
-				<EditToolbar
-					backgroundImage={config.background.image}
-					onBackgroundChange={updateBackgroundImage}
-					onDiscard={discard}
-					onSave={save}
-					isPending={isPending}
-					error={error}
-				/>
-			) : (
-				<button
-					type="button"
-					className={styles.editLink}
-					onClick={enterEdit}
-					aria-label="Edit"
-				>
-					<PencilIcon />
-				</button>
-			)}
 		</div>
 	);
 }

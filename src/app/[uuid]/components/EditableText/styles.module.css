@@ -1,23 +1,41 @@
-.input {
-	width: 100%;
-	min-width: 0;
-	padding: 0;
-	font: inherit;
-	color: inherit;
-	text-align: inherit;
-	text-shadow: inherit;
-	outline: none;
-	background: transparent;
-	border: 0;
+.wrap {
+	display: inline-flex;
+	gap: 0.25rem;
+	align-items: baseline;
+	max-width: 100%;
 }
 
-.input:focus {
-	outline: 2px dashed color-mix(in srgb, var(--accent) 60%, transparent);
+.text {
+	min-width: 1ch;
+	overflow-wrap: anywhere;
+	white-space: pre-wrap;
+	outline: none;
+}
+
+.text:focus {
+	outline: 2px dashed color-mix(in srgb, var(--onSurface) 60%, transparent);
 	outline-offset: 4px;
 	border-radius: 2px;
 }
 
-.input::placeholder {
-	color: color-mix(in srgb, var(--accent) 50%, transparent);
-	opacity: 1;
+.text.empty::before {
+	color: color-mix(in srgb, var(--onSurface) 50%, transparent);
+	content: attr(data-placeholder);
+}
+
+.editButton {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	color: var(--onSurface);
+	cursor: pointer;
+	background: none;
+	border: none;
+	filter: drop-shadow(var(--shadow));
+}
+
+.editButton:hover {
+	color: var(--onSurface);
 }
