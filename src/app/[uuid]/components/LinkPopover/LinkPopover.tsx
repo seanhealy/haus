@@ -49,33 +49,40 @@ export function LinkPopover({
 		return () => dialog.removeEventListener("click", handleClick);
 	}, [onClose]);
 
-	function setIconField(key: "scale" | "backgroundColor", value: string): void {
+	function setIconField(
+		key: "scale" | "backgroundColor" | "image",
+		value: string,
+	): void {
 		const trimmed = value.trim();
 		const currentIcon = link.icon ?? {};
-		const { scale, backgroundColor } = currentIcon;
-		const nextIcon = { scale, backgroundColor };
+		const next: NonNullable<QuickLink["icon"]> = {
+			scale: currentIcon.scale,
+			backgroundColor: currentIcon.backgroundColor,
+			image: currentIcon.image,
+		};
 
 		if (trimmed === "") {
-			nextIcon[key] = undefined;
+			next[key] = undefined;
 		} else if (key === "scale") {
 			const parsed = Number(trimmed);
 			if (Number.isNaN(parsed)) return;
-			nextIcon.scale = parsed;
+			next.scale = parsed;
+		} else if (key === "backgroundColor") {
+			next.backgroundColor = trimmed;
 		} else {
-			nextIcon.backgroundColor = trimmed;
+			next.image = trimmed;
 		}
 
-		const cleaned: QuickLink["icon"] =
-			nextIcon.scale === undefined && nextIcon.backgroundColor === undefined
-				? undefined
-				: {
-						...(nextIcon.scale !== undefined ? { scale: nextIcon.scale } : {}),
-						...(nextIcon.backgroundColor !== undefined
-							? { backgroundColor: nextIcon.backgroundColor }
-							: {}),
-					};
+		const cleaned: NonNullable<QuickLink["icon"]> = {};
+		if (next.scale !== undefined) cleaned.scale = next.scale;
+		if (next.backgroundColor !== undefined)
+			cleaned.backgroundColor = next.backgroundColor;
+		if (next.image !== undefined) cleaned.image = next.image;
 
-		onChange({ ...link, icon: cleaned });
+		onChange({
+			...link,
+			icon: Object.keys(cleaned).length > 0 ? cleaned : undefined,
+		});
 	}
 
 	return (
@@ -105,6 +112,18 @@ export function LinkPopover({
 						onChange={(event) => onChange({ ...link, url: event.target.value })}
 						onBlur={(event) =>
 							onChange({ ...link, url: normalizeUrl(event.target.value) })
+						}
+					/>
+				</label>
+				<label className={styles.field}>
+					<span>Icon image URL</span>
+					<input
+						type="text"
+						placeholder="leave blank to auto-fetch"
+						value={link.icon?.image ?? ""}
+						onChange={(event) => setIconField("image", event.target.value)}
+						onBlur={(event) =>
+							setIconField("image", normalizeUrl(event.target.value))
 						}
 					/>
 				</label>

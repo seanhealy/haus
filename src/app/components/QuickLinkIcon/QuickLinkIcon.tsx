@@ -9,7 +9,7 @@ type Props = {
 };
 
 export function QuickLinkIcon({ url, icon, loading = "lazy" }: Props) {
-	const src = iconUrlFor(url);
+	const src = icon?.image || iconUrlFor(url);
 	return (
 		<span className={styles.wrap}>
 			<span

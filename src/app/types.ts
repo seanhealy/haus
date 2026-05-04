@@ -20,6 +20,7 @@ const safeUrl = z
 export const quickLinkIconSchema = z.object({
 	scale: z.number().positive().optional(),
 	backgroundColor: z.string().optional(),
+	image: safeUrl.optional(),
 });
 
 export const quickLinkSchema = z.object({
