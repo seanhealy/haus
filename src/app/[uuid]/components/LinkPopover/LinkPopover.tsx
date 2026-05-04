@@ -93,7 +93,7 @@ export function LinkPopover({
 			onClose={onClose}
 			onKeyDown={(event) => event.stopPropagation()}
 		>
-			<div className={styles.content}>
+			<form method="dialog" className={styles.content}>
 				<label className={styles.field}>
 					<span>Label</span>
 					<input
@@ -152,11 +152,9 @@ export function LinkPopover({
 					<button type="button" className={styles.remove} onClick={onRemove}>
 						Remove
 					</button>
-					<button type="button" onClick={onClose}>
-						Done
-					</button>
+					<button type="submit">Done</button>
 				</div>
-			</div>
+			</form>
 		</dialog>
 	);
 }
