@@ -15,7 +15,7 @@ const config = {
 	background: {
 		image: "/default-background.jpg",
 	},
-	quickLinks: [],
+	sections: [],
 };
 
 const rows = await sql`

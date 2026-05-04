@@ -1,5 +1,6 @@
 import Image from "next/image";
-import type { QuickLinkIcon as QuickLinkIconConfig } from "../types";
+import type { QuickLinkIcon as QuickLinkIconConfig } from "../../types";
+import styles from "./styles.module.css";
 
 type Props = {
 	url: string;
@@ -10,9 +11,9 @@ type Props = {
 export function QuickLinkIcon({ url, icon, loading = "lazy" }: Props) {
 	const src = iconUrlFor(url);
 	return (
-		<span className="quicklink-icon-wrap">
+		<span className={styles.wrap}>
 			<span
-				className="quicklink-icon-tile"
+				className={styles.tile}
 				style={
 					icon?.backgroundColor
 						? { background: icon.backgroundColor }
@@ -21,7 +22,7 @@ export function QuickLinkIcon({ url, icon, loading = "lazy" }: Props) {
 			>
 				{src ? (
 					<Image
-						className="quicklink-icon"
+						className={styles.icon}
 						src={src}
 						alt=""
 						width={64}

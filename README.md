@@ -34,14 +34,18 @@ auth layer before sharing.
 Stored in `homepages.config` as `jsonb`. Validated with Zod
 (`src/app/types.ts`). Shape:
 
-- `background.image` — http(s) URL for the background image
-- `quickLinks` — array of `{ label, url, icon? }`
-  - `url` must be `http://` or `https://` (other schemes are rejected for
-    safety)
-  - `icon.scale` (optional) — number applied as `transform: scale(...)` to the
-    icon image inside the squircle tile. Use values >1 to zoom in on icons that
-    arrive with built-in padding
-  - `icon.backgroundColor` (optional) — CSS color for the squircle tile
+- `title` (optional) — large heading shown at the top; hidden if empty/unset
+- `subtitle` (optional) — smaller text below the title; hidden if empty/unset
+- `background.image` — http(s) URL or root-relative path for the background
+  image
+- `sections` — array of `{ label, links }`
+  - `label` — section heading (rendered above the links; hidden if empty)
+  - `links` — array of `{ label, url, icon? }`
+    - `url` must be `http://`, `https://`, or a root-relative path
+    - `icon.scale` (optional) — number applied as `transform: scale(...)` to the
+      icon image inside the squircle tile. Use values >1 to zoom in on icons
+      that arrive with built-in padding
+    - `icon.backgroundColor` (optional) — CSS color for the squircle tile
 
 Icons are auto-fetched from [icon.horse](https://icon.horse), which prefers a
 site's `apple-touch-icon` and falls back to the favicon.

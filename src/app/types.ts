@@ -17,27 +17,35 @@ const safeUrl = z
 		{ message: "Must be an http(s) URL or a root-relative path" },
 	);
 
-export const QuickLinkIconSchema = z.object({
+export const quickLinkIconSchema = z.object({
 	scale: z.number().positive().optional(),
 	backgroundColor: z.string().optional(),
 });
 
-export const QuickLinkSchema = z.object({
+export const quickLinkSchema = z.object({
 	label: z.string().min(1),
 	url: safeUrl,
-	icon: QuickLinkIconSchema.optional(),
+	icon: quickLinkIconSchema.optional(),
 });
 
-export const BackgroundConfigSchema = z.object({
+export const sectionSchema = z.object({
+	label: z.string(),
+	links: z.array(quickLinkSchema),
+});
+
+export const backgroundConfigSchema = z.object({
 	image: safeUrl,
 });
 
-export const HomeConfigSchema = z.object({
-	background: BackgroundConfigSchema,
-	quickLinks: z.array(QuickLinkSchema),
+export const homeConfigSchema = z.object({
+	title: z.string().optional(),
+	subtitle: z.string().optional(),
+	background: backgroundConfigSchema,
+	sections: z.array(sectionSchema),
 });
 
-export type QuickLinkIcon = z.infer<typeof QuickLinkIconSchema>;
-export type QuickLink = z.infer<typeof QuickLinkSchema>;
-export type BackgroundConfig = z.infer<typeof BackgroundConfigSchema>;
-export type HomeConfig = z.infer<typeof HomeConfigSchema>;
+export type QuickLinkIcon = z.infer<typeof quickLinkIconSchema>;
+export type QuickLink = z.infer<typeof quickLinkSchema>;
+export type Section = z.infer<typeof sectionSchema>;
+export type BackgroundConfig = z.infer<typeof backgroundConfigSchema>;
+export type HomeConfig = z.infer<typeof homeConfigSchema>;

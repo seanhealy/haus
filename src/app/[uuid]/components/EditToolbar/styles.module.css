@@ -1,0 +1,78 @@
+.toolbar {
+	position: fixed;
+	right: 1rem;
+	bottom: 1rem;
+	left: 1rem;
+	z-index: 5;
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+	max-width: 720px;
+	padding: 0.75rem;
+	margin: 0 auto;
+	color: var(--foreground);
+	text-shadow: none;
+	background: var(--background);
+	border: 1px solid color-mix(in srgb, var(--foreground) 18%, transparent);
+	border-radius: 10px;
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+.field {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.25rem;
+	font-size: 0.75rem;
+	color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.field input {
+	padding: 0.4rem 0.5rem;
+	font: inherit;
+	color: var(--foreground);
+	background: var(--background);
+	border: 1px solid color-mix(in srgb, var(--foreground) 20%, transparent);
+	border-radius: 4px;
+}
+
+.error {
+	flex-shrink: 0;
+	max-width: 30%;
+	font-size: 0.75rem;
+	color: #c0382b;
+}
+
+.button {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	color: var(--foreground);
+	cursor: pointer;
+	background: var(--background);
+	border: 1px solid color-mix(in srgb, var(--foreground) 20%, transparent);
+	border-radius: 6px;
+}
+
+.button:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--foreground) 6%, var(--background));
+}
+
+.button:disabled {
+	cursor: default;
+	opacity: 0.6;
+}
+
+.save {
+	color: #fff;
+	background: #2e7d32;
+	border-color: #2e7d32;
+}
+
+.save:hover:not(:disabled) {
+	background: #266c2a;
+}

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { HomeConfigSchema } from "@/app/types";
+import { homeConfigSchema } from "@/app/types";
 import { HomepageRepository } from "@/db/repositories";
 import { isUuid } from "@/utilities/isUuid";
 
@@ -14,7 +14,7 @@ export async function saveHomepage(
 	if (!isUuid(uuid)) {
 		return { ok: false, error: "Invalid id" };
 	}
-	const parsed = HomeConfigSchema.safeParse(input);
+	const parsed = homeConfigSchema.safeParse(input);
 	if (!parsed.success) {
 		const first = parsed.error.issues[0];
 		const path = first.path.join(".");
@@ -22,6 +22,5 @@ export async function saveHomepage(
 	}
 	await HomepageRepository.update(uuid, parsed.data);
 	revalidatePath(`/${uuid}`);
-	revalidatePath(`/${uuid}/edit`);
 	return { ok: true };
 }

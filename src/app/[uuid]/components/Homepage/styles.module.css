@@ -1,0 +1,103 @@
+.root {
+	position: relative;
+	min-height: 100vh;
+	overflow: hidden;
+	color: var(--accent);
+}
+
+.bg {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+	filter: saturate(105%) contrast(100%);
+}
+
+.content {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	padding: 3rem 1rem;
+	text-align: center;
+}
+
+.header .title {
+	margin: 0 0 0.25rem 0;
+	font-size: 3rem;
+	letter-spacing: -0.02em;
+	text-shadow: var(--shadow-text-strong);
+}
+
+.header .sub {
+	margin: 0 0 1.25rem 0;
+	color: var(--muted);
+	text-shadow: var(--shadow-text);
+}
+
+.linksWrap {
+	margin-top: 1rem;
+}
+
+.sections {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+	width: min(100vw - 2rem, calc(96px * 8 + 1.25rem * 7));
+	margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+	.sections {
+		width: min(100vw - 2rem, calc(72px * 4 + 1rem * 3));
+	}
+}
+
+.editLink {
+	position: fixed;
+	top: 0.5rem;
+	right: 0.5rem;
+	z-index: 3;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	color: var(--muted);
+	touch-action: manipulation;
+	cursor: pointer;
+	background: none;
+	border: none;
+	opacity: 0.85;
+	filter: drop-shadow(var(--shadow-text));
+	transition: opacity 0.12s ease;
+}
+
+.editLink:hover {
+	opacity: 1;
+}
+
+.addSection {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	justify-content: center;
+	padding: 0.75rem 1rem;
+	font: inherit;
+	color: var(--muted);
+	cursor: pointer;
+	background: color-mix(in srgb, #000 25%, transparent);
+	border: 1px dashed color-mix(in srgb, var(--accent) 35%, transparent);
+	border-radius: 10px;
+}
+
+.addSection:hover {
+	color: var(--accent);
+	border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+}
