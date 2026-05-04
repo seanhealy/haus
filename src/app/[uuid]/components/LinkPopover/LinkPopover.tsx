@@ -84,6 +84,7 @@ export function LinkPopover({
 			className={styles.dialog}
 			aria-label="Edit link"
 			onClose={onClose}
+			onKeyDown={(event) => event.stopPropagation()}
 		>
 			<div className={styles.content}>
 				<label className={styles.field}>
