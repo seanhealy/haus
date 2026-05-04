@@ -24,4 +24,4 @@ const rows = await sql`
 	RETURNING id
 `;
 
-console.log(`Created /${rows[0].id}`);
+console.log(`Created https://page.haus/${rows[0].id}`);
