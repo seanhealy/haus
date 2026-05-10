@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { HomeConfig } from "@/app/types";
+import { type HomeConfig, homeConfigSchema } from "@/app/types";
 import { db } from "@/db";
 import { homepages } from "@/db/schema";
 
@@ -10,7 +10,8 @@ export const HomepageRepository = {
 			.from(homepages)
 			.where(eq(homepages.id, id))
 			.limit(1);
-		return row?.config ?? null;
+		if (!row) return null;
+		return homeConfigSchema.parse(row.config);
 	},
 
 	async create(config: HomeConfig): Promise<{ id: string }> {

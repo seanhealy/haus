@@ -16,8 +16,8 @@
 	outline: none;
 	background: transparent;
 	border: 0;
-	border-bottom: 2px solid var(--onSurface);
-	filter: drop-shadow(var(--shadow));
+	border-bottom: var(--input-border);
+	filter: var(--drop-shadow);
 }
 
 .error {
@@ -42,7 +42,7 @@
 	cursor: pointer;
 	background: none;
 	border: none;
-	filter: drop-shadow(var(--shadow));
+	filter: var(--drop-shadow);
 }
 
 .button:disabled {

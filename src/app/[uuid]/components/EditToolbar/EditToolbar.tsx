@@ -14,6 +14,8 @@ function normalizeUrl(value: string): string {
 type Props = {
 	backgroundImage: string;
 	onBackgroundChange: (value: string) => void;
+	searchUrl: string;
+	onSearchUrlChange: (value: string) => void;
 	onDiscard: () => void;
 	onSave: () => void;
 	isPending: boolean;
@@ -23,6 +25,8 @@ type Props = {
 export function EditToolbar({
 	backgroundImage,
 	onBackgroundChange,
+	searchUrl,
+	onSearchUrlChange,
 	onDiscard,
 	onSave,
 	isPending,
@@ -30,17 +34,17 @@ export function EditToolbar({
 }: Props) {
 	return (
 		<>
-			<label className={styles.field}>
-				<span>PageBackground</span>
-				<input
-					type="text"
-					value={backgroundImage}
-					onChange={(event) => onBackgroundChange(event.target.value)}
-					onBlur={(event) =>
-						onBackgroundChange(normalizeUrl(event.target.value))
-					}
-				/>
-			</label>
+			<UrlField
+				label="PageBackground"
+				value={backgroundImage}
+				onChange={onBackgroundChange}
+			/>
+			<UrlField
+				label="SearchEngine (use %s for the query)"
+				value={searchUrl}
+				placeholder="https://kagi.com/search?q=%s"
+				onChange={onSearchUrlChange}
+			/>
 			{error ? <span className={styles.error}>{error}</span> : null}
 			<div className={styles.actions}>
 				<button
@@ -63,5 +67,27 @@ export function EditToolbar({
 				</button>
 			</div>
 		</>
+	);
+}
+
+type UrlFieldProps = {
+	label: string;
+	value: string;
+	onChange: (value: string) => void;
+	placeholder?: string;
+};
+
+function UrlField({ label, value, onChange, placeholder }: UrlFieldProps) {
+	return (
+		<label className={styles.field}>
+			<span>{label}</span>
+			<input
+				type="text"
+				value={value}
+				placeholder={placeholder}
+				onChange={(event) => onChange(event.target.value)}
+				onBlur={(event) => onChange(normalizeUrl(event.target.value))}
+			/>
+		</label>
 	);
 }

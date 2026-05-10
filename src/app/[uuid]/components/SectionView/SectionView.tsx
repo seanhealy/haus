@@ -1,4 +1,5 @@
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
+import { useMemo } from "react";
 import { QuickLinkIcon } from "@/app/components/QuickLinkIcon";
 import type { QuickLink, Section } from "@/app/types";
 import { EditableLinkTile } from "../EditableLinkTile";
@@ -8,8 +9,9 @@ import styles from "./styles.module.css";
 
 type Props = {
 	section: Section;
-	linkKeys: string[];
 	isEdit: boolean;
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
 	onLabelChange: (label: string) => void;
 	onAddLink: () => void;
 	onRemoveLink: (linkIndex: number) => void;
@@ -23,8 +25,9 @@ type Props = {
 
 export function SectionView({
 	section,
-	linkKeys,
 	isEdit,
+	open,
+	onOpenChange,
 	onLabelChange,
 	onAddLink,
 	onRemoveLink,
@@ -37,13 +40,16 @@ export function SectionView({
 }: Props) {
 	if (!isEdit) {
 		return section.label ? (
-			<details className={styles.section} open>
+			<details
+				className={styles.section}
+				open={open}
+				onToggle={(event) => onOpenChange(event.currentTarget.open)}
+			>
 				<summary className={`${styles.label} ${styles.summary}`}>
 					{section.label}
 				</summary>
 				<SectionLinks
 					section={section}
-					linkKeys={linkKeys}
 					isEdit={false}
 					onAddLink={onAddLink}
 					onRemoveLink={onRemoveLink}
@@ -54,7 +60,6 @@ export function SectionView({
 			<section className={styles.section}>
 				<SectionLinks
 					section={section}
-					linkKeys={linkKeys}
 					isEdit={false}
 					onAddLink={onAddLink}
 					onRemoveLink={onRemoveLink}
@@ -102,7 +107,6 @@ export function SectionView({
 			</div>
 			<SectionLinks
 				section={section}
-				linkKeys={linkKeys}
 				isEdit
 				onAddLink={onAddLink}
 				onRemoveLink={onRemoveLink}
@@ -114,7 +118,6 @@ export function SectionView({
 
 type SectionLinksProps = {
 	section: Section;
-	linkKeys: string[];
 	isEdit: boolean;
 	onAddLink: () => void;
 	onRemoveLink: (linkIndex: number) => void;
@@ -123,24 +126,24 @@ type SectionLinksProps = {
 
 function SectionLinks({
 	section,
-	linkKeys,
 	isEdit,
 	onAddLink,
 	onRemoveLink,
 	onUpdateLink,
 }: SectionLinksProps) {
+	const linkIds = useMemo(
+		() => section.links.map((link) => link.id),
+		[section.links],
+	);
+
 	if (!isEdit) {
 		return (
 			<nav
 				className={styles.quicklinks}
 				aria-label={section.label || "Quick links"}
 			>
-				{section.links.map((link, idx) => (
-					<a
-						className={styles.quicklink}
-						key={linkKeys[idx] ?? link.url}
-						href={link.url}
-					>
+				{section.links.map((link) => (
+					<a className={styles.quicklink} key={link.id} href={link.url}>
 						<QuickLinkIcon url={link.url} icon={link.icon} loading="eager" />
 						<span className={styles.quicklinkLabel}>{link.label}</span>
 					</a>
@@ -150,15 +153,15 @@ function SectionLinks({
 	}
 
 	return (
-		<SortableContext items={linkKeys} strategy={rectSortingStrategy}>
+		<SortableContext items={linkIds} strategy={rectSortingStrategy}>
 			<div className={styles.quicklinks}>
-				{section.links.map((link, idx) => (
+				{section.links.map((link, linkIndex) => (
 					<EditableLinkTile
-						key={linkKeys[idx]}
-						id={linkKeys[idx]}
+						key={link.id}
+						id={link.id}
 						link={link}
-						onChange={(next) => onUpdateLink(idx, next)}
-						onRemove={() => onRemoveLink(idx)}
+						onChange={(next) => onUpdateLink(linkIndex, next)}
+						onRemove={() => onRemoveLink(linkIndex)}
 					/>
 				))}
 				<button

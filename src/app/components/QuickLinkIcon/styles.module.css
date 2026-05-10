@@ -1,6 +1,6 @@
 .wrap {
 	display: inline-block;
-	filter: drop-shadow(var(--shadow));
+	filter: var(--drop-shadow);
 }
 
 .tile {

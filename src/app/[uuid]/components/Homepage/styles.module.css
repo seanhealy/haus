@@ -20,10 +20,11 @@
 	z-index: 2;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
 	justify-content: center;
+	width: var(--content-width);
 	min-height: 100vh;
-	padding: 3rem 1rem;
+	padding: 3rem 0;
+	margin: 0 auto;
 	text-align: center;
 }
 
@@ -55,14 +56,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 2rem;
-	width: min(100vw - 2rem, calc(96px * 8 + 1.25rem * 7));
-	margin: 0 auto;
-}
-
-@media (max-width: 640px) {
-	.sections {
-		width: min(100vw - 2rem, calc(72px * 4 + 1rem * 3));
-	}
 }
 
 .editLink {
@@ -78,7 +71,7 @@
 	background: none;
 	border: none;
 	opacity: 0.85;
-	filter: drop-shadow(var(--shadow));
+	filter: var(--drop-shadow);
 	transition: opacity 0.12s ease;
 }
 
@@ -99,7 +92,7 @@
 	cursor: pointer;
 	background: none;
 	border: none;
-	filter: drop-shadow(var(--shadow));
+	filter: var(--drop-shadow);
 }
 
 .addSection:hover {

@@ -1,0 +1,29 @@
+.root {
+	display: flex;
+	margin: 0 0 1.5rem;
+}
+
+.input {
+	flex: 1;
+	min-width: 0;
+	padding: 0.6rem 0.25rem;
+	font: inherit;
+	font-size: 1rem;
+	color: var(--onSurface);
+	text-align: left;
+	outline: none;
+	background: transparent;
+	border: 0;
+	border-bottom: var(--input-border);
+	filter: var(--drop-shadow);
+}
+
+.input::placeholder {
+	color: var(--onSurface);
+	opacity: 0.6;
+}
+
+.input::-webkit-search-cancel-button {
+	-webkit-appearance: none;
+	appearance: none;
+}

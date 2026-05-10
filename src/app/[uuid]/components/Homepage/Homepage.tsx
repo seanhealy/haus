@@ -11,41 +11,75 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useEffect, useId, useRef, useState, useTransition } from "react";
-import type { HomeConfig, QuickLink } from "@/app/types";
+import { useEffect, useState, useTransition } from "react";
+import type { HomeConfig, QuickLink, Section } from "@/app/types";
 import { saveHomepage } from "../../actions";
+import { writeSectionsCookie } from "../../sectionsCookie.client";
 import { EditableText } from "../EditableText";
 import { EditToolbar } from "../EditToolbar";
 import { PencilIcon, PlusIcon } from "../icons";
+import { SearchBar } from "../SearchBar";
 import { SectionView } from "../SectionView";
 import styles from "./styles.module.css";
 
 type Props = {
 	uuid: string;
 	initial: HomeConfig;
+	initialOpenSections: Record<string, boolean>;
 };
 
 type Mode = "view" | "edit";
 
-export function Homepage({ uuid, initial }: Props) {
-	const baseId = useId();
-	const keyCounterRef = useRef(0);
-	function newKey() {
-		keyCounterRef.current += 1;
-		return `${baseId}-${keyCounterRef.current}`;
-	}
+function createSection(): Section {
+	return { id: crypto.randomUUID(), label: "", links: [] };
+}
 
+function createLink(): QuickLink {
+	return {
+		id: crypto.randomUUID(),
+		label: "New link",
+		url: "https://example.com",
+	};
+}
+
+function updateAt<Item>(
+	items: Item[],
+	index: number,
+	update: (item: Item) => Item,
+): Item[] {
+	return items.map((item, currentIndex) =>
+		currentIndex === index ? update(item) : item,
+	);
+}
+
+function removeAt<Item>(items: Item[], index: number): Item[] {
+	return items.filter((_, currentIndex) => currentIndex !== index);
+}
+
+export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 	const [mode, setMode] = useState<Mode>("view");
 	const [config, setConfig] = useState<HomeConfig>(initial);
-	const [sectionKeys, setSectionKeys] = useState<string[]>(() =>
-		initial.sections.map(() => newKey()),
-	);
-	const [linkKeysBySection, setLinkKeysBySection] = useState<string[][]>(() =>
-		initial.sections.map((s) => s.links.map(() => newKey())),
-	);
 	const [lastSavedConfig, setLastSavedConfig] = useState<HomeConfig>(initial);
 	const [error, setError] = useState<string | null>(null);
 	const [isPending, startTransition] = useTransition();
+	const [openSections, setOpenSections] =
+		useState<Record<string, boolean>>(initialOpenSections);
+
+	function updateSections(update: (sections: Section[]) => Section[]) {
+		setConfig((current) => ({
+			...current,
+			sections: update(current.sections),
+		}));
+	}
+
+	function toggleSectionOpen(sectionId: string, open: boolean) {
+		setOpenSections((current) => {
+			if (current[sectionId] === open) return current;
+			const next = { ...current, [sectionId]: open };
+			writeSectionsCookie(uuid, next).catch(() => {});
+			return next;
+		});
+	}
 
 	const isDirty = config !== lastSavedConfig;
 
@@ -75,10 +109,6 @@ export function Homepage({ uuid, initial }: Props) {
 
 	function discard() {
 		setConfig(lastSavedConfig);
-		setSectionKeys(lastSavedConfig.sections.map(() => newKey()));
-		setLinkKeysBySection(
-			lastSavedConfig.sections.map((s) => s.links.map(() => newKey())),
-		);
 		setError(null);
 		setMode("view");
 	}
@@ -109,32 +139,30 @@ export function Homepage({ uuid, initial }: Props) {
 		setConfig((current) => ({ ...current, background: { image } }));
 	}
 
+	function updateSearchUrl(url: string) {
+		setConfig((current) => {
+			const trimmed = url.trim();
+			if (trimmed === "") return { ...current, search: undefined };
+			return {
+				...current,
+				search: { ...current.search, url: trimmed },
+			};
+		});
+	}
+
 	function updateSectionLabel(sectionIndex: number, label: string) {
-		setConfig((current) => ({
-			...current,
-			sections: current.sections.map((section, i) =>
-				i === sectionIndex ? { ...section, label } : section,
-			),
-		}));
+		updateSections((sections) =>
+			updateAt(sections, sectionIndex, (section) => ({ ...section, label })),
+		);
 	}
 
 	function addSection() {
-		setConfig((current) => ({
-			...current,
-			sections: [...current.sections, { label: "", links: [] }],
-		}));
-		setSectionKeys((keys) => [...keys, newKey()]);
-		setLinkKeysBySection((keys) => [...keys, []]);
+		updateSections((sections) => [...sections, createSection()]);
 	}
 
 	function removeSection(sectionIndex: number) {
 		if (!confirm("Remove this section and all its links?")) return;
-		setConfig((current) => ({
-			...current,
-			sections: current.sections.filter((_, i) => i !== sectionIndex),
-		}));
-		setSectionKeys((keys) => keys.filter((_, i) => i !== sectionIndex));
-		setLinkKeysBySection((keys) => keys.filter((_, i) => i !== sectionIndex));
+		updateSections((sections) => removeAt(sections, sectionIndex));
 	}
 
 	function updateLink(
@@ -142,86 +170,45 @@ export function Homepage({ uuid, initial }: Props) {
 		linkIndex: number,
 		next: QuickLink,
 	) {
-		setConfig((current) => ({
-			...current,
-			sections: current.sections.map((section, i) =>
-				i === sectionIndex
-					? {
-							...section,
-							links: section.links.map((link, j) =>
-								j === linkIndex ? next : link,
-							),
-						}
-					: section,
-			),
-		}));
+		updateSections((sections) =>
+			updateAt(sections, sectionIndex, (section) => ({
+				...section,
+				links: updateAt(section.links, linkIndex, (existing) => ({
+					...next,
+					id: existing.id,
+				})),
+			})),
+		);
 	}
 
 	function addLink(sectionIndex: number) {
-		setConfig((current) => ({
-			...current,
-			sections: current.sections.map((section, i) =>
-				i === sectionIndex
-					? {
-							...section,
-							links: [
-								...section.links,
-								{ label: "New link", url: "https://example.com" },
-							],
-						}
-					: section,
-			),
-		}));
-		setLinkKeysBySection((keys) =>
-			keys.map((sectionKeys, i) =>
-				i === sectionIndex ? [...sectionKeys, newKey()] : sectionKeys,
-			),
+		updateSections((sections) =>
+			updateAt(sections, sectionIndex, (section) => ({
+				...section,
+				links: [...section.links, createLink()],
+			})),
 		);
 	}
 
 	function removeLink(sectionIndex: number, linkIndex: number) {
-		setConfig((current) => ({
-			...current,
-			sections: current.sections.map((section, i) =>
-				i === sectionIndex
-					? {
-							...section,
-							links: section.links.filter((_, j) => j !== linkIndex),
-						}
-					: section,
-			),
-		}));
-		setLinkKeysBySection((keys) =>
-			keys.map((sectionKeys, i) =>
-				i === sectionIndex
-					? sectionKeys.filter((_, j) => j !== linkIndex)
-					: sectionKeys,
-			),
+		updateSections((sections) =>
+			updateAt(sections, sectionIndex, (section) => ({
+				...section,
+				links: removeAt(section.links, linkIndex),
+			})),
 		);
 	}
 
 	function moveSection(from: number, to: number) {
-		setConfig((current) => ({
-			...current,
-			sections: reorder(current.sections, from, to),
-		}));
-		setSectionKeys((keys) => reorder(keys, from, to));
-		setLinkKeysBySection((keys) => reorder(keys, from, to));
+		updateSections((sections) => reorder(sections, from, to));
 	}
 
 	function moveLink(sectionIndex: number, from: number, to: number) {
-		setConfig((current) => ({
-			...current,
-			sections: current.sections.map((section, i) =>
-				i === sectionIndex
-					? { ...section, links: reorder(section.links, from, to) }
-					: section,
-			),
-		}));
-		setLinkKeysBySection((keys) =>
-			keys.map((sectionKeys, i) =>
-				i === sectionIndex ? reorder(sectionKeys, from, to) : sectionKeys,
-			),
+		updateSections((sections) =>
+			updateAt(sections, sectionIndex, (section) => ({
+				...section,
+				links: reorder(section.links, from, to),
+			})),
 		);
 	}
 
@@ -231,14 +218,15 @@ export function Homepage({ uuid, initial }: Props) {
 		const activeId = String(active.id);
 		const overId = String(over.id);
 
-		for (let s = 0; s < linkKeysBySection.length; s++) {
-			const linkFrom = linkKeysBySection[s].indexOf(activeId);
-			if (linkFrom !== -1) {
-				const linkTo = linkKeysBySection[s].indexOf(overId);
-				if (linkTo !== -1) moveLink(s, linkFrom, linkTo);
-				return;
-			}
-		}
+		const sectionIndex = config.sections.findIndex((section) =>
+			section.links.some((link) => link.id === activeId),
+		);
+		if (sectionIndex === -1) return;
+		const links = config.sections[sectionIndex].links;
+		const linkFrom = links.findIndex((link) => link.id === activeId);
+		const linkTo = links.findIndex((link) => link.id === overId);
+		if (linkTo === -1) return;
+		moveLink(sectionIndex, linkFrom, linkTo);
 	}
 
 	const isEdit = mode === "edit";
@@ -258,6 +246,8 @@ export function Homepage({ uuid, initial }: Props) {
 					onSubtitleChange={updateSubtitle}
 				/>
 
+				{!isEdit && config.search ? <SearchBar config={config.search} /> : null}
+
 				<section className={styles.linksWrap}>
 					<DndContext
 						sensors={sensors}
@@ -267,10 +257,11 @@ export function Homepage({ uuid, initial }: Props) {
 						<div className={styles.sections}>
 							{config.sections.map((section, sectionIndex) => (
 								<SectionView
-									key={sectionKeys[sectionIndex]}
+									key={section.id}
 									section={section}
-									linkKeys={linkKeysBySection[sectionIndex] ?? []}
 									isEdit={isEdit}
+									open={openSections[section.id] ?? true}
+									onOpenChange={(open) => toggleSectionOpen(section.id, open)}
 									onLabelChange={(label) =>
 										updateSectionLabel(sectionIndex, label)
 									}
@@ -301,6 +292,8 @@ export function Homepage({ uuid, initial }: Props) {
 									<EditToolbar
 										backgroundImage={config.background.image}
 										onBackgroundChange={updateBackgroundImage}
+										searchUrl={config.search?.url ?? ""}
+										onSearchUrlChange={updateSearchUrl}
 										onDiscard={discard}
 										onSave={save}
 										isPending={isPending}

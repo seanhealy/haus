@@ -2,6 +2,10 @@
 	--surface: #0a0a0a;
 	--onSurface: #ffffff;
 	--shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+	--drop-shadow: drop-shadow(var(--shadow));
+
+	--content-width: min(100vw - 2rem, 768px + 8.75rem);
+	--input-border: 2px solid var(--onSurface);
 }
 
 html {
