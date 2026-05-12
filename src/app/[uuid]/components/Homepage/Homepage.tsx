@@ -240,7 +240,7 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 				section.links.some((link) => link.id === linkId),
 			);
 			const toSection = sections.find((section) => section.id === toSectionId);
-      const movedLink = fromSection?.links.find((link) => link.id === linkId);
+			const movedLink = fromSection?.links.find((link) => link.id === linkId);
 
 			if (!fromSection || !movedLink || !toSection) return sections;
 
