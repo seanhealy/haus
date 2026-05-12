@@ -1,3 +1,4 @@
+import { useDroppable } from "@dnd-kit/core";
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { useMemo } from "react";
 import { QuickLinkIcon } from "@/app/components/QuickLinkIcon";
@@ -39,6 +40,7 @@ export function SectionView({
 	canMoveDown,
 }: Props) {
 	if (!isEdit) {
+		const links = <ViewLinks section={section} />;
 		return section.label ? (
 			<details
 				className={styles.section}
@@ -48,24 +50,10 @@ export function SectionView({
 				<summary className={`${styles.label} ${styles.summary}`}>
 					{section.label}
 				</summary>
-				<SectionLinks
-					section={section}
-					isEdit={false}
-					onAddLink={onAddLink}
-					onRemoveLink={onRemoveLink}
-					onUpdateLink={onUpdateLink}
-				/>
+				{links}
 			</details>
 		) : (
-			<section className={styles.section}>
-				<SectionLinks
-					section={section}
-					isEdit={false}
-					onAddLink={onAddLink}
-					onRemoveLink={onRemoveLink}
-					onUpdateLink={onUpdateLink}
-				/>
-			</section>
+			<section className={styles.section}>{links}</section>
 		);
 	}
 
@@ -105,9 +93,8 @@ export function SectionView({
 					<XIcon size={18} />
 				</button>
 			</div>
-			<SectionLinks
+			<EditableLinks
 				section={section}
-				isEdit
 				onAddLink={onAddLink}
 				onRemoveLink={onRemoveLink}
 				onUpdateLink={onUpdateLink}
@@ -116,45 +103,47 @@ export function SectionView({
 	);
 }
 
-type SectionLinksProps = {
+function ViewLinks({ section }: { section: Section }) {
+	return (
+		<nav
+			className={styles.quicklinks}
+			aria-label={section.label || "Quick links"}
+		>
+			{section.links.map((link) => (
+				<a className={styles.quicklink} key={link.id} href={link.url}>
+					<QuickLinkIcon url={link.url} icon={link.icon} />
+					<span className={styles.quicklinkLabel}>{link.label}</span>
+				</a>
+			))}
+		</nav>
+	);
+}
+
+type EditableLinksProps = {
 	section: Section;
-	isEdit: boolean;
 	onAddLink: () => void;
 	onRemoveLink: (linkIndex: number) => void;
 	onUpdateLink: (linkIndex: number, next: QuickLink) => void;
 };
 
-function SectionLinks({
+function EditableLinks({
 	section,
-	isEdit,
 	onAddLink,
 	onRemoveLink,
 	onUpdateLink,
-}: SectionLinksProps) {
+}: EditableLinksProps) {
 	const linkIds = useMemo(
 		() => section.links.map((link) => link.id),
 		[section.links],
 	);
-
-	if (!isEdit) {
-		return (
-			<nav
-				className={styles.quicklinks}
-				aria-label={section.label || "Quick links"}
-			>
-				{section.links.map((link) => (
-					<a className={styles.quicklink} key={link.id} href={link.url}>
-						<QuickLinkIcon url={link.url} icon={link.icon} loading="eager" />
-						<span className={styles.quicklinkLabel}>{link.label}</span>
-					</a>
-				))}
-			</nav>
-		);
-	}
+	const { setNodeRef } = useDroppable({
+		id: section.id,
+		data: { type: "section" },
+	});
 
 	return (
 		<SortableContext items={linkIds} strategy={rectSortingStrategy}>
-			<div className={styles.quicklinks}>
+			<div ref={setNodeRef} className={styles.quicklinks}>
 				{section.links.map((link, linkIndex) => (
 					<EditableLinkTile
 						key={link.id}

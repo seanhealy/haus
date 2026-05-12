@@ -16,7 +16,7 @@ type Props = {
 };
 
 export function EditableLinkTile({ id, link, onChange, onRemove }: Props) {
-	const sortable = useSortable({ id });
+	const sortable = useSortable({ id, data: { type: "link" } });
 	const [isOpen, setIsOpen] = useState(false);
 
 	const style = {

@@ -1,12 +1,16 @@
 "use client";
 
 import {
+	type CollisionDetection,
 	closestCenter,
 	DndContext,
-	type DragEndEvent,
+	type DragOverEvent,
+	DragOverlay,
 	KeyboardSensor,
 	PointerSensor,
+	pointerWithin,
 	TouchSensor,
+	useDndContext,
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
@@ -15,6 +19,7 @@ import { useEffect, useState, useTransition } from "react";
 import type { HomeConfig, QuickLink, Section } from "@/app/types";
 import { saveHomepage } from "../../actions";
 import { writeSectionsCookie } from "../../sectionsCookie.client";
+import { LinkTilePreview } from "../EditableLinkTile";
 import { EditableText } from "../EditableText";
 import { EditToolbar } from "../EditToolbar";
 import { PencilIcon, PlusIcon } from "../icons";
@@ -29,6 +34,28 @@ type Props = {
 };
 
 type Mode = "view" | "edit";
+
+const collisionDetection: CollisionDetection = (args) => {
+	const pointerHits = pointerWithin(args);
+	if (pointerHits.length === 0) return closestCenter(args);
+
+	const linkHits = pointerHits.filter((hit) => {
+		const container = args.droppableContainers.find(
+			(entry) => entry.id === hit.id,
+		);
+		return container?.data.current?.type === "link";
+	});
+	return linkHits.length > 0 ? linkHits : pointerHits;
+};
+
+function DragLinkPreview({ sections }: { sections: Section[] }) {
+	const { active } = useDndContext();
+	if (!active) return null;
+	const link = sections
+		.flatMap((section) => section.links)
+		.find((entry) => entry.id === active.id);
+	return link ? <LinkTilePreview link={link} /> : null;
+}
 
 function createSection(): Section {
 	return { id: crypto.randomUUID(), label: "", links: [] };
@@ -203,30 +230,59 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 		updateSections((sections) => reorder(sections, from, to));
 	}
 
-	function moveLink(sectionIndex: number, from: number, to: number) {
-		updateSections((sections) =>
-			updateAt(sections, sectionIndex, (section) => ({
-				...section,
-				links: reorder(section.links, from, to),
-			})),
-		);
+	function moveLink(
+		linkId: string,
+		toSectionId: string,
+		targetLinkId: string | null,
+	) {
+		updateSections((sections) => {
+			const fromSection = sections.find((section) =>
+				section.links.some((link) => link.id === linkId),
+			);
+			const toSection = sections.find((section) => section.id === toSectionId);
+      const movedLink = fromSection?.links.find((link) => link.id === linkId);
+
+			if (!fromSection || !movedLink || !toSection) return sections;
+
+			return sections.map((section) => {
+				if (section !== fromSection && section !== toSection) return section;
+
+				const links =
+					section === fromSection
+						? section.links.filter((link) => link.id !== linkId)
+						: section.links;
+				if (section !== toSection) return { ...section, links };
+
+				const insertAt = targetLinkId
+					? links.findIndex((link) => link.id === targetLinkId)
+					: links.length;
+				return {
+					...section,
+					links: [
+						...links.slice(0, insertAt),
+						movedLink,
+						...links.slice(insertAt),
+					],
+				};
+			});
+		});
 	}
 
-	function handleDragEnd(event: DragEndEvent) {
+	function handleDragOver(event: DragOverEvent) {
 		const { active, over } = event;
 		if (!over || active.id === over.id) return;
-		const activeId = String(active.id);
-		const overId = String(over.id);
 
-		const sectionIndex = config.sections.findIndex((section) =>
-			section.links.some((link) => link.id === activeId),
-		);
-		if (sectionIndex === -1) return;
-		const links = config.sections[sectionIndex].links;
-		const linkFrom = links.findIndex((link) => link.id === activeId);
-		const linkTo = links.findIndex((link) => link.id === overId);
-		if (linkTo === -1) return;
-		moveLink(sectionIndex, linkFrom, linkTo);
+		const overId = String(over.id);
+		const overType = over.data.current?.type;
+
+		if (overType === "section") {
+			moveLink(String(active.id), overId, null);
+		} else if (overType === "link") {
+			const section = config.sections.find((entry) =>
+				entry.links.some((link) => link.id === overId),
+			);
+			if (section) moveLink(String(active.id), section.id, overId);
+		}
 	}
 
 	const isEdit = mode === "edit";
@@ -251,8 +307,8 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 				<section className={styles.linksWrap}>
 					<DndContext
 						sensors={sensors}
-						collisionDetection={closestCenter}
-						onDragEnd={handleDragEnd}
+						collisionDetection={collisionDetection}
+						onDragOver={handleDragOver}
 					>
 						<div className={styles.sections}>
 							{config.sections.map((section, sectionIndex) => (
@@ -311,6 +367,9 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 								</button>
 							)}
 						</div>
+						<DragOverlay>
+							<DragLinkPreview sections={config.sections} />
+						</DragOverlay>
 					</DndContext>
 				</section>
 			</main>
