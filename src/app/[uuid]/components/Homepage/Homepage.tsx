@@ -93,10 +93,11 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 		useState<Record<string, boolean>>(initialOpenSections);
 
 	function updateSections(update: (sections: Section[]) => Section[]) {
-		setConfig((current) => ({
-			...current,
-			sections: update(current.sections),
-		}));
+		setConfig((current) => {
+			const sections = update(current.sections);
+			if (sections === current.sections) return current;
+			return { ...current, sections };
+		});
 	}
 
 	function toggleSectionOpen(sectionId: string, open: boolean) {
@@ -244,26 +245,30 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 
 			if (!fromSection || !movedLink || !toSection) return sections;
 
+			const base =
+				fromSection === toSection
+					? toSection.links.filter((link) => link.id !== linkId)
+					: toSection.links;
+			const insertAt = targetLinkId
+				? base.findIndex((link) => link.id === targetLinkId)
+				: base.length;
+			const nextLinks = [
+				...base.slice(0, insertAt),
+				movedLink,
+				...base.slice(insertAt),
+			];
+
+			if (sameOrder(nextLinks, toSection.links)) return sections;
+
 			return sections.map((section) => {
-				if (section !== fromSection && section !== toSection) return section;
-
-				const links =
-					section === fromSection
-						? section.links.filter((link) => link.id !== linkId)
-						: section.links;
-				if (section !== toSection) return { ...section, links };
-
-				const insertAt = targetLinkId
-					? links.findIndex((link) => link.id === targetLinkId)
-					: links.length;
-				return {
-					...section,
-					links: [
-						...links.slice(0, insertAt),
-						movedLink,
-						...links.slice(insertAt),
-					],
-				};
+				if (section === toSection) return { ...section, links: nextLinks };
+				if (section === fromSection) {
+					return {
+						...section,
+						links: section.links.filter((link) => link.id !== linkId),
+					};
+				}
+				return section;
 			});
 		});
 	}
@@ -384,6 +389,13 @@ function reorder<T>(items: T[], from: number, to: number): T[] {
 	const [item] = next.splice(from, 1);
 	next.splice(to, 0, item);
 	return next;
+}
+
+function sameOrder<Item>(next: Item[], previous: Item[]): boolean {
+	return (
+		next.length === previous.length &&
+		next.every((item, index) => item === previous[index])
+	);
 }
 
 type HeaderAreaProps = {
