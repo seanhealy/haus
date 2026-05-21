@@ -1,40 +1,124 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
-import type { SearchConfig } from "@/app/types";
+import {
+	Combobox,
+	ComboboxInput,
+	ComboboxOption,
+	ComboboxOptions,
+} from "@headlessui/react";
+import { useEffect, useRef, useState } from "react";
+import { QuickLinkIcon } from "@/app/components/QuickLinkIcon";
+import type { SearchConfig, Section } from "@/app/types";
+import { readRecents, recentsStorageKey, rememberSearch } from "./recents";
 import styles from "./styles.module.css";
+import {
+	buildSuggestions,
+	metaLabel,
+	type Suggestion,
+	suggestionKey,
+} from "./suggestions";
+
+const ICON_SIZE = 28;
 
 type Props = {
 	config: SearchConfig;
+	sections: Section[];
+	uuid: string;
 };
 
-export function SearchBar({ config }: Props) {
+export function SearchBar({ config, sections, uuid }: Props) {
 	const [query, setQuery] = useState("");
+	const [recents, setRecents] = useState<string[]>([]);
+	const privateHeld = useRef(false);
+	const storageKey = recentsStorageKey(uuid);
 
-	function handleSubmit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		const trimmed = query.trim();
+	useEffect(() => {
+		setRecents(readRecents(storageKey));
+	}, [storageKey]);
+
+	// Track Ctrl globally in the capture phase so its state is settled before
+	// the combobox's own key handler fires the selection — holding Ctrl on
+	// select runs the search privately (not recorded into recents). Reset on
+	// blur so a Ctrl release missed while the tab was unfocused can't stick.
+	useEffect(() => {
+		function track(event: KeyboardEvent) {
+			privateHeld.current = event.ctrlKey;
+		}
+		function reset() {
+			privateHeld.current = false;
+		}
+		window.addEventListener("keydown", track, true);
+		window.addEventListener("keyup", track, true);
+		window.addEventListener("blur", reset);
+		return () => {
+			window.removeEventListener("keydown", track, true);
+			window.removeEventListener("keyup", track, true);
+			window.removeEventListener("blur", reset);
+		};
+	}, []);
+
+	const suggestions = buildSuggestions(query, recents, sections);
+
+	function handleSelect(suggestion: Suggestion | null) {
+		if (!suggestion) return;
+		if (suggestion.kind === "link") {
+			window.location.assign(suggestion.url);
+			return;
+		}
+		runSearch(suggestion.query, privateHeld.current);
+	}
+
+	function runSearch(rawQuery: string, isPrivate: boolean) {
+		const trimmed = rawQuery.trim();
 		if (!trimmed) return;
+		if (!isPrivate) {
+			setRecents(rememberSearch(storageKey, recents, trimmed));
+		}
 		const target = config.url.replaceAll("%s", encodeURIComponent(trimmed));
 		window.location.assign(target);
 	}
 
 	return (
-		<form className={styles.root} onSubmit={handleSubmit} role="search">
-			<input
-				type="search"
-				name="q"
-				className={styles.input}
-				placeholder={config.placeholder ?? "Search"}
-				value={query}
-				onChange={(event) => setQuery(event.target.value)}
-				autoCapitalize="none"
-				autoCorrect="off"
-				spellCheck={false}
-				// biome-ignore lint/a11y/noAutofocus: search is the primary action on this surface
-				autoFocus
-				aria-label="Search"
-			/>
-		</form>
+		<div className={styles.root} role="search">
+			<Combobox<Suggestion | null> onChange={handleSelect}>
+				<ComboboxInput
+					className={styles.input}
+					placeholder={config.placeholder ?? "Search"}
+					aria-label="Search"
+					autoComplete="off"
+					autoCapitalize="none"
+					autoCorrect="off"
+					spellCheck={false}
+					autoFocus
+					onChange={(event) => setQuery(event.target.value)}
+				/>
+				<ComboboxOptions anchor="bottom start" className={styles.options}>
+					{suggestions.map((suggestion) => {
+						const meta = metaLabel(suggestion);
+						return (
+							<ComboboxOption
+								key={suggestionKey(suggestion)}
+								value={suggestion}
+								className={styles.option}
+							>
+								<QuickLinkIcon
+									url={suggestion.kind === "link" ? suggestion.url : config.url}
+									icon={
+										suggestion.kind === "link" ? suggestion.icon : undefined
+									}
+									size={ICON_SIZE}
+								/>
+								<span className={styles.optionText}>
+									{meta ? (
+										<span className={styles.optionMeta}>{meta}</span>
+									) : null}
+									<span className={styles.optionLabel}>{suggestion.label}</span>
+								</span>
+							</ComboboxOption>
+						);
+					})}
+				</ComboboxOptions>
+			</Combobox>
+		</div>
 	);
 }

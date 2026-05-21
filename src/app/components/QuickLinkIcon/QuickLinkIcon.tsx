@@ -6,19 +6,21 @@ type Props = {
 	url: string;
 	icon?: QuickLinkIconConfig;
 	loading?: "eager" | "lazy";
+	size?: number;
 };
 
-export function QuickLinkIcon({ url, icon, loading = "lazy" }: Props) {
+export function QuickLinkIcon({ url, icon, loading = "lazy", size }: Props) {
 	const src = icon?.image || iconUrlFor(url);
 	return (
 		<span className={styles.wrap}>
 			<span
 				className={styles.tile}
-				style={
-					icon?.backgroundColor
+				style={{
+					...(size ? { width: size, height: size } : null),
+					...(icon?.backgroundColor
 						? { background: icon.backgroundColor }
-						: undefined
-				}
+						: null),
+				}}
 			>
 				{src ? (
 					<Image

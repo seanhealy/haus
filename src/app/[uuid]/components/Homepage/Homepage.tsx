@@ -307,7 +307,13 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 					onSubtitleChange={updateSubtitle}
 				/>
 
-				{!isEdit && config.search ? <SearchBar config={config.search} /> : null}
+				{!isEdit && config.search ? (
+					<SearchBar
+						config={config.search}
+						sections={config.sections}
+						uuid={uuid}
+					/>
+				) : null}
 
 				<section className={styles.linksWrap}>
 					<DndContext
