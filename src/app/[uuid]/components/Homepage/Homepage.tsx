@@ -18,7 +18,6 @@ import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useEffect, useState, useTransition } from "react";
 import type { HomeConfig, QuickLink, Section } from "@/app/types";
 import { saveHomepage } from "../../actions";
-import { writeSectionsCookie } from "../../sectionsCookie.client";
 import { LinkTilePreview } from "../EditableLinkTile";
 import { EditableText } from "../EditableText";
 import { EditToolbar } from "../EditToolbar";
@@ -89,23 +88,12 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 	const [lastSavedConfig, setLastSavedConfig] = useState<HomeConfig>(initial);
 	const [error, setError] = useState<string | null>(null);
 	const [isPending, startTransition] = useTransition();
-	const [openSections, setOpenSections] =
-		useState<Record<string, boolean>>(initialOpenSections);
 
 	function updateSections(update: (sections: Section[]) => Section[]) {
 		setConfig((current) => {
 			const sections = update(current.sections);
 			if (sections === current.sections) return current;
 			return { ...current, sections };
-		});
-	}
-
-	function toggleSectionOpen(sectionId: string, open: boolean) {
-		setOpenSections((current) => {
-			if (current[sectionId] === open) return current;
-			const next = { ...current, [sectionId]: open };
-			writeSectionsCookie(uuid, next).catch(() => {});
-			return next;
 		});
 	}
 
@@ -326,9 +314,9 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 								<SectionView
 									key={section.id}
 									section={section}
+									uuid={uuid}
 									isEdit={isEdit}
-									open={openSections[section.id] ?? true}
-									onOpenChange={(open) => toggleSectionOpen(section.id, open)}
+									defaultOpen={initialOpenSections[section.id] ?? true}
 									onLabelChange={(label) =>
 										updateSectionLabel(sectionIndex, label)
 									}
