@@ -33,6 +33,7 @@
 }
 
 .moveButton,
+.toggle,
 .remove {
 	display: flex;
 	flex-shrink: 0;
@@ -54,8 +55,17 @@
 }
 
 .moveButton:not(:disabled):hover,
+.toggle:hover,
 .remove:hover {
 	color: var(--onSurface);
+}
+
+.searchOnlyBadge {
+	flex-shrink: 0;
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	text-shadow: var(--shadow);
 }
 
 .quicklinks {

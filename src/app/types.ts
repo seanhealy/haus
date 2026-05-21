@@ -40,6 +40,7 @@ export const sectionSchema = z
 		id: z.string().optional(),
 		label: z.string(),
 		links: z.array(quickLinkSchema),
+		hidden: z.boolean().optional(),
 	})
 	.transform((section) => ({
 		...section,

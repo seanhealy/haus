@@ -90,3 +90,23 @@ export function GripIcon({ size = 16 }: IconProps) {
 		</svg>
 	);
 }
+
+export function EyeIcon(props: IconProps) {
+	return (
+		<Svg {...props}>
+			<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+			<circle cx="12" cy="12" r="3" />
+		</Svg>
+	);
+}
+
+export function EyeOffIcon(props: IconProps) {
+	return (
+		<Svg {...props}>
+			<path d="M9.9 9.9a3 3 0 1 0 4.2 4.2" />
+			<path d="M10.7 5.1A10.4 10.4 0 0 1 12 5c7 0 11 7 11 7a13.2 13.2 0 0 1-1.7 2.7" />
+			<path d="M6.6 6.6A13.5 13.5 0 0 0 1 12s4 7 11 7a9.7 9.7 0 0 0 5.4-1.6" />
+			<line x1="2" y1="2" x2="22" y2="22" />
+		</Svg>
+	);
+}

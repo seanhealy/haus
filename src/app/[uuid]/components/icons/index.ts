@@ -2,6 +2,8 @@ export {
 	CheckIcon,
 	ChevronDownIcon,
 	ChevronUpIcon,
+	EyeIcon,
+	EyeOffIcon,
 	GripIcon,
 	PencilIcon,
 	PlusIcon,

@@ -33,14 +33,16 @@ export function HomepageView({ uuid, config, openSections }: Props) {
 
 			<section className={layout.linksWrap}>
 				<div className={layout.sections}>
-					{sections.map((section) => (
-						<SectionLinks
-							key={section.id}
-							uuid={uuid}
-							section={section}
-							defaultOpen={openSections[section.id] ?? true}
-						/>
-					))}
+					{sections
+						.filter((section) => !section.hidden)
+						.map((section) => (
+							<SectionLinks
+								key={section.id}
+								uuid={uuid}
+								section={section}
+								defaultOpen={openSections[section.id] ?? true}
+							/>
+						))}
 				</div>
 			</section>
 

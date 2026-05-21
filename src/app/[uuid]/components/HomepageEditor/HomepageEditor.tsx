@@ -164,6 +164,15 @@ export function HomepageEditor({ uuid, initial }: Props) {
 		);
 	}
 
+	function toggleSectionHidden(sectionIndex: number) {
+		updateSections((sections) =>
+			updateAt(sections, sectionIndex, (section) => ({
+				...section,
+				hidden: !section.hidden,
+			})),
+		);
+	}
+
 	function addSection() {
 		updateSections((sections) => [...sections, createSection()]);
 	}
@@ -298,6 +307,7 @@ export function HomepageEditor({ uuid, initial }: Props) {
 							<SectionView
 								key={section.id}
 								section={section}
+								hidden={section.hidden ?? false}
 								onLabelChange={(label) =>
 									updateSectionLabel(sectionIndex, label)
 								}
@@ -309,6 +319,7 @@ export function HomepageEditor({ uuid, initial }: Props) {
 									updateLink(sectionIndex, linkIndex, next)
 								}
 								onRemoveSection={() => removeSection(sectionIndex)}
+								onToggleHidden={() => toggleSectionHidden(sectionIndex)}
 								onMoveUp={() => moveSection(sectionIndex, sectionIndex - 1)}
 								onMoveDown={() => moveSection(sectionIndex, sectionIndex + 1)}
 								canMoveUp={sectionIndex > 0}

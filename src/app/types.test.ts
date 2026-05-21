@@ -123,5 +123,19 @@ describe("types", () => {
 				expect(result.links[0].id).toMatch(UUID_REGEX);
 			});
 		});
+
+		describe("when marked hidden", () => {
+			it("keeps the hidden flag", () => {
+				const result = sectionSchema.parse(makeInput({ hidden: true }));
+				expect(result.hidden).toBe(true);
+			});
+		});
+
+		describe("when hidden is omitted", () => {
+			it("leaves hidden undefined", () => {
+				const result = sectionSchema.parse(makeInput());
+				expect(result.hidden).toBeUndefined();
+			});
+		});
 	});
 });

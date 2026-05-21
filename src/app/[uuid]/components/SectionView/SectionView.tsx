@@ -4,12 +4,21 @@ import { useMemo } from "react";
 import type { QuickLink, Section } from "@/app/types";
 import { EditableLinkTile } from "../EditableLinkTile";
 import { EditableText } from "../EditableText";
-import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon } from "../icons";
+import {
+	ChevronDownIcon,
+	ChevronUpIcon,
+	EyeIcon,
+	EyeOffIcon,
+	PlusIcon,
+	XIcon,
+} from "../icons";
 import styles from "./styles.module.css";
 
 type Props = {
 	section: Section;
+	hidden: boolean;
 	onLabelChange: (label: string) => void;
+	onToggleHidden: () => void;
 	onAddLink: () => void;
 	onRemoveLink: (linkIndex: number) => void;
 	onUpdateLink: (linkIndex: number, next: QuickLink) => void;
@@ -22,7 +31,9 @@ type Props = {
 
 export function SectionView({
 	section,
+	hidden,
 	onLabelChange,
+	onToggleHidden,
 	onAddLink,
 	onRemoveLink,
 	onUpdateLink,
@@ -41,6 +52,20 @@ export function SectionView({
 					placeholder="Section name"
 					onChange={onLabelChange}
 				/>
+				{hidden ? (
+					<span className={styles.searchOnlyBadge}>Search-only</span>
+				) : null}
+				<button
+					type="button"
+					className={styles.toggle}
+					onClick={onToggleHidden}
+					aria-pressed={hidden}
+					aria-label={
+						hidden ? "Show section on page" : "Hide section from page"
+					}
+				>
+					{hidden ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+				</button>
 				<button
 					type="button"
 					className={styles.moveButton}
