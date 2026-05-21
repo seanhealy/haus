@@ -1,10 +1,9 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useState } from "react";
-import { QuickLinkIcon } from "@/app/components/QuickLinkIcon";
 import type { QuickLink } from "@/app/types";
-import { PencilIcon } from "../icons";
 import { LinkPopover } from "../LinkPopover";
+import { LinkTile } from "../LinkTile";
 import sectionStyles from "../SectionView/styles.module.css";
 import styles from "./styles.module.css";
 
@@ -33,24 +32,7 @@ export function EditableLinkTile({ id, link, onChange, onRemove }: Props) {
 			{...sortable.attributes}
 			{...sortable.listeners}
 		>
-			<button
-				type="button"
-				className={styles.tileButton}
-				onClick={() => setIsOpen(true)}
-			>
-				<QuickLinkIcon url={link.url} icon={link.icon} />
-			</button>
-			<span className={sectionStyles.quicklinkLabel}>
-				{link.label || <span className={styles.labelPlaceholder}>Label</span>}
-				<button
-					type="button"
-					className={styles.editButton}
-					onClick={() => setIsOpen(true)}
-					aria-label="Edit link"
-				>
-					<PencilIcon size={12} />
-				</button>
-			</span>
+			<LinkTile link={link} onClick={() => setIsOpen(true)} />
 			<LinkPopover
 				open={isOpen}
 				link={link}

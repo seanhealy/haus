@@ -1,11 +1,11 @@
 import { useDroppable } from "@dnd-kit/core";
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { useMemo } from "react";
-import { QuickLinkIcon } from "@/app/components/QuickLinkIcon";
 import type { QuickLink, Section } from "@/app/types";
 import { EditableLinkTile } from "../EditableLinkTile";
 import { EditableText } from "../EditableText";
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon } from "../icons";
+import { LinkTile } from "../LinkTile";
 import styles from "./styles.module.css";
 
 type Props = {
@@ -111,8 +111,7 @@ function ViewLinks({ section }: { section: Section }) {
 		>
 			{section.links.map((link) => (
 				<a className={styles.quicklink} key={link.id} href={link.url}>
-					<QuickLinkIcon url={link.url} icon={link.icon} />
-					<span className={styles.quicklinkLabel}>{link.label}</span>
+					<LinkTile link={link} />
 				</a>
 			))}
 		</nav>
