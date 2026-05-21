@@ -1,9 +1,7 @@
 import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
 import { preload } from "react-dom";
-import { HomepageRepository } from "@/db/repositories";
-import { isUuid } from "@/utilities/isUuid";
-import { Homepage } from "./components/Homepage";
+import { HomepageView } from "./components/HomepageView";
+import { loadHomepageOr404 } from "./loadHomepage";
 import { parseSectionsCookie, sectionsCookieName } from "./sectionsCookie";
 
 type Props = {
@@ -11,12 +9,7 @@ type Props = {
 };
 
 export default async function App({ params }: Props) {
-	const { uuid } = await params;
-	if (!isUuid(uuid)) notFound();
-
-	const config = await HomepageRepository.findById(uuid);
-
-	if (!config) notFound();
+	const { uuid, config } = await loadHomepageOr404(params);
 
 	preload(config.background.image, { as: "image", fetchPriority: "high" });
 	const cookieStore = await cookies();
@@ -24,6 +17,6 @@ export default async function App({ params }: Props) {
 		cookieStore.get(sectionsCookieName(uuid))?.value,
 	);
 	return (
-		<Homepage uuid={uuid} initial={config} initialOpenSections={openSections} />
+		<HomepageView uuid={uuid} config={config} openSections={openSections} />
 	);
 }

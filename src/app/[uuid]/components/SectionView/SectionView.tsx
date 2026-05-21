@@ -2,18 +2,13 @@ import { useDroppable } from "@dnd-kit/core";
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { useMemo } from "react";
 import type { QuickLink, Section } from "@/app/types";
-import { CollapsibleSection } from "../CollapsibleSection";
 import { EditableLinkTile } from "../EditableLinkTile";
 import { EditableText } from "../EditableText";
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon } from "../icons";
-import { LinkTile } from "../LinkTile";
 import styles from "./styles.module.css";
 
 type Props = {
 	section: Section;
-	uuid: string;
-	isEdit: boolean;
-	defaultOpen: boolean;
 	onLabelChange: (label: string) => void;
 	onAddLink: () => void;
 	onRemoveLink: (linkIndex: number) => void;
@@ -27,9 +22,6 @@ type Props = {
 
 export function SectionView({
 	section,
-	uuid,
-	isEdit,
-	defaultOpen,
 	onLabelChange,
 	onAddLink,
 	onRemoveLink,
@@ -40,22 +32,6 @@ export function SectionView({
 	canMoveUp,
 	canMoveDown,
 }: Props) {
-	if (!isEdit) {
-		const links = <ViewLinks section={section} />;
-		return section.label ? (
-			<CollapsibleSection
-				uuid={uuid}
-				sectionId={section.id}
-				label={section.label}
-				defaultOpen={defaultOpen}
-			>
-				{links}
-			</CollapsibleSection>
-		) : (
-			<section className={styles.section}>{links}</section>
-		);
-	}
-
 	return (
 		<section className={`${styles.section} ${styles.editing}`}>
 			<div className={styles.head}>
@@ -99,21 +75,6 @@ export function SectionView({
 				onUpdateLink={onUpdateLink}
 			/>
 		</section>
-	);
-}
-
-function ViewLinks({ section }: { section: Section }) {
-	return (
-		<nav
-			className={styles.quicklinks}
-			aria-label={section.label || "Quick links"}
-		>
-			{section.links.map((link) => (
-				<a className={styles.quicklink} key={link.id} href={link.url}>
-					<LinkTile link={link} />
-				</a>
-			))}
-		</nav>
 	);
 }
 

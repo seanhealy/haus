@@ -15,24 +15,23 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import type { HomeConfig, QuickLink, Section } from "@/app/types";
 import { saveHomepage } from "../../actions";
 import { LinkTilePreview } from "../EditableLinkTile";
 import { EditableText } from "../EditableText";
 import { EditToolbar } from "../EditToolbar";
-import { PencilIcon, PlusIcon } from "../icons";
-import { SearchBar } from "../SearchBar";
+import { HomepageBackdrop } from "../HomepageBackdrop";
+import layout from "../HomepageBackdrop/styles.module.css";
+import { PlusIcon } from "../icons";
 import { SectionView } from "../SectionView";
 import styles from "./styles.module.css";
 
 type Props = {
 	uuid: string;
 	initial: HomeConfig;
-	initialOpenSections: Record<string, boolean>;
 };
-
-type Mode = "view" | "edit";
 
 const collisionDetection: CollisionDetection = (args) => {
 	const pointerHits = pointerWithin(args);
@@ -82,8 +81,8 @@ function removeAt<Item>(items: Item[], index: number): Item[] {
 	return items.filter((_, currentIndex) => currentIndex !== index);
 }
 
-export function Homepage({ uuid, initial, initialOpenSections }: Props) {
-	const [mode, setMode] = useState<Mode>("view");
+export function HomepageEditor({ uuid, initial }: Props) {
+	const router = useRouter();
 	const [config, setConfig] = useState<HomeConfig>(initial);
 	const [lastSavedConfig, setLastSavedConfig] = useState<HomeConfig>(initial);
 	const [error, setError] = useState<string | null>(null);
@@ -118,15 +117,8 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 		}),
 	);
 
-	function enterEdit() {
-		setMode("edit");
-		setError(null);
-	}
-
 	function discard() {
-		setConfig(lastSavedConfig);
-		setError(null);
-		setMode("view");
+		router.push(`/${uuid}`);
 	}
 
 	function save() {
@@ -136,7 +128,7 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 			const result = await saveHomepage(uuid, snapshot);
 			if (result.ok) {
 				setLastSavedConfig(snapshot);
-				setMode("view");
+				router.push(`/${uuid}`);
 			} else {
 				setError(result.error);
 			}
@@ -278,101 +270,76 @@ export function Homepage({ uuid, initial, initialOpenSections }: Props) {
 		}
 	}
 
-	const isEdit = mode === "edit";
-
 	return (
-		<div className={styles.root}>
-			<div
-				className={styles.bg}
-				style={{ backgroundImage: `url(${config.background.image})` }}
-			/>
-			<main className={styles.content}>
-				<HeaderArea
-					title={config.title ?? ""}
-					subtitle={config.subtitle ?? ""}
-					isEdit={isEdit}
-					onTitleChange={updateTitle}
-					onSubtitleChange={updateSubtitle}
+		<HomepageBackdrop backgroundImage={config.background.image}>
+			<header className={layout.header}>
+				<EditableText
+					className={layout.title}
+					value={config.title ?? ""}
+					placeholder="Add a title"
+					onChange={updateTitle}
 				/>
+				<EditableText
+					className={layout.sub}
+					value={config.subtitle ?? ""}
+					placeholder="Add a subtitle"
+					onChange={updateSubtitle}
+				/>
+			</header>
 
-				{!isEdit && config.search ? (
-					<SearchBar
-						config={config.search}
-						sections={config.sections}
-						uuid={uuid}
-					/>
-				) : null}
-
-				<section className={styles.linksWrap}>
-					<DndContext
-						sensors={sensors}
-						collisionDetection={collisionDetection}
-						onDragOver={handleDragOver}
-					>
-						<div className={styles.sections}>
-							{config.sections.map((section, sectionIndex) => (
-								<SectionView
-									key={section.id}
-									section={section}
-									uuid={uuid}
-									isEdit={isEdit}
-									defaultOpen={initialOpenSections[section.id] ?? true}
-									onLabelChange={(label) =>
-										updateSectionLabel(sectionIndex, label)
-									}
-									onAddLink={() => addLink(sectionIndex)}
-									onRemoveLink={(linkIndex) =>
-										removeLink(sectionIndex, linkIndex)
-									}
-									onUpdateLink={(linkIndex, next) =>
-										updateLink(sectionIndex, linkIndex, next)
-									}
-									onRemoveSection={() => removeSection(sectionIndex)}
-									onMoveUp={() => moveSection(sectionIndex, sectionIndex - 1)}
-									onMoveDown={() => moveSection(sectionIndex, sectionIndex + 1)}
-									canMoveUp={sectionIndex > 0}
-									canMoveDown={sectionIndex < config.sections.length - 1}
-								/>
-							))}
-							{isEdit ? (
-								<>
-									<button
-										type="button"
-										className={styles.addSection}
-										onClick={addSection}
-									>
-										<span>Add section</span>
-										<PlusIcon size={16} />
-									</button>
-									<EditToolbar
-										backgroundImage={config.background.image}
-										onBackgroundChange={updateBackgroundImage}
-										searchUrl={config.search?.url ?? ""}
-										onSearchUrlChange={updateSearchUrl}
-										onDiscard={discard}
-										onSave={save}
-										isPending={isPending}
-										error={error}
-									/>
-								</>
-							) : (
-								<button
-									type="button"
-									className={styles.editLink}
-									onClick={enterEdit}
-									aria-label="Edit"
-								>
-									<PencilIcon />
-								</button>
-							)}
-						</div>
-						<DragOverlay>
-							<DragLinkPreview sections={config.sections} />
-						</DragOverlay>
-					</DndContext>
-				</section>
-			</main>
-		</div>
+			<section className={layout.linksWrap}>
+				<DndContext
+					sensors={sensors}
+					collisionDetection={collisionDetection}
+					onDragOver={handleDragOver}
+				>
+					<div className={layout.sections}>
+						{config.sections.map((section, sectionIndex) => (
+							<SectionView
+								key={section.id}
+								section={section}
+								onLabelChange={(label) =>
+									updateSectionLabel(sectionIndex, label)
+								}
+								onAddLink={() => addLink(sectionIndex)}
+								onRemoveLink={(linkIndex) =>
+									removeLink(sectionIndex, linkIndex)
+								}
+								onUpdateLink={(linkIndex, next) =>
+									updateLink(sectionIndex, linkIndex, next)
+								}
+								onRemoveSection={() => removeSection(sectionIndex)}
+								onMoveUp={() => moveSection(sectionIndex, sectionIndex - 1)}
+								onMoveDown={() => moveSection(sectionIndex, sectionIndex + 1)}
+								canMoveUp={sectionIndex > 0}
+								canMoveDown={sectionIndex < config.sections.length - 1}
+							/>
+						))}
+						<button
+							type="button"
+							className={styles.addSection}
+							onClick={addSection}
+						>
+							<span>Add section</span>
+							<PlusIcon size={16} />
+						</button>
+						<EditToolbar
+							backgroundImage={config.background.image}
+							onBackgroundChange={updateBackgroundImage}
+							searchUrl={config.search?.url ?? ""}
+							onSearchUrlChange={updateSearchUrl}
+							onDiscard={discard}
+							onSave={save}
+							isPending={isPending}
+							error={error}
+						/>
+					</div>
+					<DragOverlay>
+						<DragLinkPreview sections={config.sections} />
+					</DragOverlay>
+				</DndContext>
+			</section>
+		</HomepageBackdrop>
 	);
 }
 
@@ -389,48 +356,5 @@ function sameOrder<Item>(next: Item[], previous: Item[]): boolean {
 	return (
 		next.length === previous.length &&
 		next.every((item, index) => item === previous[index])
-	);
-}
-
-type HeaderAreaProps = {
-	title: string;
-	subtitle: string;
-	isEdit: boolean;
-	onTitleChange: (title: string) => void;
-	onSubtitleChange: (subtitle: string) => void;
-};
-
-function HeaderArea({
-	title,
-	subtitle,
-	isEdit,
-	onTitleChange,
-	onSubtitleChange,
-}: HeaderAreaProps) {
-	if (!isEdit && !title && !subtitle) return null;
-
-	return (
-		<header className={styles.header}>
-			{isEdit ? (
-				<EditableText
-					className={styles.title}
-					value={title}
-					placeholder="Add a title"
-					onChange={onTitleChange}
-				/>
-			) : title ? (
-				<h1 className={styles.title}>{title}</h1>
-			) : null}
-			{isEdit ? (
-				<EditableText
-					className={styles.sub}
-					value={subtitle}
-					placeholder="Add a subtitle"
-					onChange={onSubtitleChange}
-				/>
-			) : subtitle ? (
-				<p className={styles.sub}>{subtitle}</p>
-			) : null}
-		</header>
 	);
 }
