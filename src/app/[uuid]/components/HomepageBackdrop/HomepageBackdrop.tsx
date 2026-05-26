@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ReactNode } from "react";
 import styles from "./styles.module.css";
 
@@ -11,10 +12,16 @@ type Props = {
 export function HomepageBackdrop({ backgroundImage, children }: Props) {
 	return (
 		<div className={styles.root}>
-			<div
-				className={styles.bg}
-				style={{ backgroundImage: `url(${backgroundImage})` }}
-			/>
+			<div className={styles.bg}>
+				<Image
+					src={backgroundImage}
+					alt=""
+					fill
+					priority
+					sizes="100vw"
+					className={styles.bgImage}
+				/>
+			</div>
 			<main className={styles.content}>{children}</main>
 		</div>
 	);
