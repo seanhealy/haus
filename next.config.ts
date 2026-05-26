@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
 	reactCompiler: true,
 	images: {
-		remotePatterns: [{ protocol: "https", hostname: "icon.horse" }],
+		remotePatterns: [{ protocol: "https", hostname: "**" }],
 	},
 };
 

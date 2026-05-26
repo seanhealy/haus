@@ -29,7 +29,6 @@ export function QuickLinkIcon({ url, icon, loading = "lazy", size }: Props) {
 						alt=""
 						width={64}
 						height={64}
-						unoptimized
 						loading={loading}
 						style={
 							icon?.scale ? { transform: `scale(${icon.scale})` } : undefined
