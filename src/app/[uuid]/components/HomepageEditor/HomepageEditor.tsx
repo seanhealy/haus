@@ -15,7 +15,7 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import type { HomeConfig, QuickLink, Section } from "@/app/types";
 import { saveHomepage } from "../../actions";
 import { LinkTilePreview } from "../EditableLinkTile";
@@ -95,10 +95,12 @@ export function HomepageEditor({ uuid, initial }: Props) {
 	}
 
 	const isDirty = config !== lastSavedConfig;
+	const isLeaving = useRef(false);
 
 	useEffect(() => {
 		if (!isDirty) return;
 		function handler(event: BeforeUnloadEvent) {
+			if (isLeaving.current) return;
 			event.preventDefault();
 		}
 		window.addEventListener("beforeunload", handler);
@@ -115,8 +117,13 @@ export function HomepageEditor({ uuid, initial }: Props) {
 		}),
 	);
 
+	function leaveTo(url: string) {
+		isLeaving.current = true;
+		window.location.assign(url);
+	}
+
 	function discard() {
-		window.location.assign(`/${uuid}`);
+		leaveTo(`/${uuid}`);
 	}
 
 	function save() {
@@ -126,7 +133,7 @@ export function HomepageEditor({ uuid, initial }: Props) {
 			const result = await saveHomepage(uuid, snapshot);
 			if (result.ok) {
 				setLastSavedConfig(snapshot);
-				window.location.assign(`/${uuid}`);
+				leaveTo(`/${uuid}`);
 			} else {
 				setError(result.error);
 			}
