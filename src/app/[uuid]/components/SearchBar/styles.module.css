@@ -79,7 +79,6 @@
 	opacity: 0.55;
 }
 
-/* Divider drawn in the top margin so the row's highlight keeps a gap from it. */
 .option:last-child:not(:only-child) {
 	position: relative;
 	margin-top: 0.85rem;

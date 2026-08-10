@@ -139,9 +139,6 @@ export function SearchBar({ config, sections, uuid }: Props) {
 	);
 }
 
-// Headless UI clamps at the ends, so at a boundary we synthesize the Home/End
-// key it maps to the opposite end. Done in the capture phase, before Headless's
-// own bubble handler runs and consumes the arrow.
 function wrapArrowNavigation(
 	event: ReactKeyboardEvent<HTMLInputElement>,
 	activeIndex: number | null,
