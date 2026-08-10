@@ -60,6 +60,11 @@
 	opacity: 0.75;
 }
 
+.empty {
+	font-size: 0.95rem;
+	opacity: 0.7;
+}
+
 .changes {
 	display: flex;
 	flex-direction: column;

@@ -19,8 +19,10 @@ export default async function HistoryPage({ params }: Props) {
 	const { uuid } = await params;
 	if (!isUuid(uuid)) notFound();
 
+	const homepage = await HomepageRepository.findById(uuid);
+	if (!homepage) notFound();
+
 	const revisions = await HomepageRepository.listRevisions(uuid);
-	if (revisions.length === 0) notFound();
 
 	const entries = revisions
 		.map((revision, index) => ({
@@ -42,34 +44,40 @@ export default async function HistoryPage({ params }: Props) {
 				</Link>
 			</header>
 
-			<ol className={styles.entries}>
-				{entries.map((entry) => (
-					<li key={entry.id} className={styles.entry}>
-						<time
-							className={styles.time}
-							dateTime={entry.createdAt.toISOString()}
-						>
-							{timestamp.format(entry.createdAt)} UTC
-						</time>
-						{entry.changes === null ? (
-							<p className={styles.note}>Created</p>
-						) : entry.changes.length === 0 ? (
-							<p className={styles.note}>Saved with no changes</p>
-						) : (
-							<ul className={styles.changes}>
-								{entry.changes.map((change, index) => (
-									<li
-										key={`${change.kind}-${index}`}
-										className={styles[change.kind]}
-									>
-										{change.description}
-									</li>
-								))}
-							</ul>
-						)}
-					</li>
-				))}
-			</ol>
+			{entries.length === 0 ? (
+				<p className={styles.empty}>
+					No history yet. Changes are recorded from your next save.
+				</p>
+			) : (
+				<ol className={styles.entries}>
+					{entries.map((entry) => (
+						<li key={entry.id} className={styles.entry}>
+							<time
+								className={styles.time}
+								dateTime={entry.createdAt.toISOString()}
+							>
+								{timestamp.format(entry.createdAt)} UTC
+							</time>
+							{entry.changes === null ? (
+								<p className={styles.note}>Created</p>
+							) : entry.changes.length === 0 ? (
+								<p className={styles.note}>Saved with no changes</p>
+							) : (
+								<ul className={styles.changes}>
+									{entry.changes.map((change, index) => (
+										<li
+											key={`${change.kind}-${index}`}
+											className={styles[change.kind]}
+										>
+											{change.description}
+										</li>
+									))}
+								</ul>
+							)}
+						</li>
+					))}
+				</ol>
+			)}
 		</main>
 	);
 }
