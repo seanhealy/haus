@@ -24,6 +24,7 @@ import {
 } from "./suggestions";
 
 const ICON_SIZE = 28;
+const SEARCH_ICON_SCALE = 0.8;
 
 type Props = {
 	config: SearchConfig;
@@ -105,6 +106,12 @@ export function SearchBar({ config, sections, uuid }: Props) {
 						<ComboboxOptions anchor="bottom start" className={styles.options}>
 							{suggestions.map((suggestion) => {
 								const meta = metaLabel(suggestion);
+								const icon =
+									suggestion.kind === "link"
+										? suggestion.icon
+										: suggestion.kind === "search"
+											? { scale: SEARCH_ICON_SCALE }
+											: undefined;
 								return (
 									<ComboboxOption
 										key={suggestionKey(suggestion)}
@@ -115,9 +122,7 @@ export function SearchBar({ config, sections, uuid }: Props) {
 											url={
 												suggestion.kind === "link" ? suggestion.url : config.url
 											}
-											icon={
-												suggestion.kind === "link" ? suggestion.icon : undefined
-											}
+											icon={icon}
 											size={ICON_SIZE}
 										/>
 										<span className={styles.optionText}>
