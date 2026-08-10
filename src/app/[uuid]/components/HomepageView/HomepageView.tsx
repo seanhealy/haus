@@ -67,7 +67,12 @@ function SectionLinks({ uuid, section }: SectionLinksProps) {
 			aria-label={section.label || "Quick links"}
 		>
 			{section.links.map((link) => (
-				<a className={sectionStyles.quicklink} key={link.id} href={link.url}>
+				<a
+					className={sectionStyles.quicklink}
+					key={link.id}
+					href={link.url}
+					rel="noreferrer"
+				>
 					<LinkTile link={link} />
 				</a>
 			))}
