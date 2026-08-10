@@ -56,7 +56,7 @@ export function buildSuggestions(
 		query: trimmed,
 	};
 
-	return [searchOption, ...linkMatches, ...recentMatches];
+	return [...linkMatches, ...recentMatches, searchOption];
 }
 
 export function metaLabel(suggestion: Suggestion): string | null {
