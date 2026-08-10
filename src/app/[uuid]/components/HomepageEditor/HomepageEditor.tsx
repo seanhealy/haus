@@ -15,7 +15,8 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 import type { HomeConfig, QuickLink, Section } from "@/app/types";
 import { saveHomepage } from "../../actions";
 import { LinkTilePreview } from "../EditableLinkTile";
@@ -81,6 +82,7 @@ function removeAt<Item>(items: Item[], index: number): Item[] {
 }
 
 export function HomepageEditor({ uuid, initial }: Props) {
+	const router = useRouter();
 	const [config, setConfig] = useState<HomeConfig>(initial);
 	const [lastSavedConfig, setLastSavedConfig] = useState<HomeConfig>(initial);
 	const [error, setError] = useState<string | null>(null);
@@ -95,12 +97,10 @@ export function HomepageEditor({ uuid, initial }: Props) {
 	}
 
 	const isDirty = config !== lastSavedConfig;
-	const isLeaving = useRef(false);
 
 	useEffect(() => {
 		if (!isDirty) return;
 		function handler(event: BeforeUnloadEvent) {
-			if (isLeaving.current) return;
 			event.preventDefault();
 		}
 		window.addEventListener("beforeunload", handler);
@@ -117,13 +117,8 @@ export function HomepageEditor({ uuid, initial }: Props) {
 		}),
 	);
 
-	function leaveTo(url: string) {
-		isLeaving.current = true;
-		window.location.assign(url);
-	}
-
 	function discard() {
-		leaveTo(`/${uuid}`);
+		router.push(`/${uuid}`);
 	}
 
 	function save() {
@@ -133,7 +128,7 @@ export function HomepageEditor({ uuid, initial }: Props) {
 			const result = await saveHomepage(uuid, snapshot);
 			if (result.ok) {
 				setLastSavedConfig(snapshot);
-				leaveTo(`/${uuid}`);
+				router.push(`/${uuid}`);
 			} else {
 				setError(result.error);
 			}

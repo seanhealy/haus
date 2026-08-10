@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { setSectionOpen } from "../../sectionsCookie.client";
+import { readSectionsState, setSectionOpen } from "../../sectionsCookie.client";
 
 type Props = {
 	uuid: string;
@@ -14,6 +14,9 @@ export function SectionOpenPersister({ uuid, sectionId }: Props) {
 	useEffect(() => {
 		const details = anchor.current?.closest("details");
 		if (!details) return;
+
+		const saved = readSectionsState(uuid)[sectionId] ?? true;
+		if (details.open !== saved) details.open = saved;
 
 		const persist = () => {
 			setSectionOpen(uuid, sectionId, details.open).catch(() => {});
