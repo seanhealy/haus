@@ -9,6 +9,8 @@ type Props = {
 	params: Promise<{ uuid: string }>;
 };
 
+const PAGE_SIZE = 25;
+
 const timestamp = new Intl.DateTimeFormat("en-US", {
 	dateStyle: "medium",
 	timeStyle: "short",
@@ -22,17 +24,21 @@ export default async function HistoryPage({ params }: Props) {
 	const homepage = await HomepageRepository.findById(uuid);
 	if (!homepage) notFound();
 
-	const revisions = await HomepageRepository.listRevisions(uuid);
+	const rows = await HomepageRepository.listRevisions(uuid, PAGE_SIZE + 1);
+	const truncated = rows.length > PAGE_SIZE;
 
-	const entries = revisions
-		.map((revision, index) => ({
-			id: revision.id,
-			createdAt: revision.createdAt,
-			changes:
-				index === 0
-					? null
-					: describeChanges(revisions[index - 1].config, revision.config),
-		}))
+	const entries = rows
+		.map((revision, index) => {
+			const previous = rows[index - 1];
+			return {
+				id: revision.id,
+				createdAt: revision.createdAt,
+				changes: previous
+					? describeChanges(previous.config, revision.config)
+					: null,
+			};
+		})
+		.slice(truncated ? 1 : 0)
 		.reverse();
 
 	return (
@@ -78,6 +84,12 @@ export default async function HistoryPage({ params }: Props) {
 					))}
 				</ol>
 			)}
+
+			{truncated ? (
+				<p className={styles.note}>
+					Showing the {PAGE_SIZE} most recent changes.
+				</p>
+			) : null}
 		</main>
 	);
 }

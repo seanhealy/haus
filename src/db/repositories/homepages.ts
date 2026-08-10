@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { type HomeConfig, homeConfigSchema } from "@/app/types";
 import { db } from "@/db";
 import { homepageRevisions, homepages } from "@/db/schema";
@@ -43,7 +43,7 @@ export const HomepageRepository = {
 		});
 	},
 
-	async listRevisions(id: string): Promise<HomepageRevision[]> {
+	async listRevisions(id: string, limit: number): Promise<HomepageRevision[]> {
 		const rows = await db
 			.select({
 				id: homepageRevisions.id,
@@ -52,7 +52,8 @@ export const HomepageRepository = {
 			})
 			.from(homepageRevisions)
 			.where(eq(homepageRevisions.homepageId, id))
-			.orderBy(asc(homepageRevisions.createdAt));
-		return rows;
+			.orderBy(desc(homepageRevisions.createdAt))
+			.limit(limit);
+		return rows.reverse();
 	},
 };
