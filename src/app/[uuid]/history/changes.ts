@@ -57,40 +57,34 @@ function describeOp(op: Op, document: HomeConfig): Change {
 }
 
 function target(pointer: string, document: HomeConfig): string {
-	const [head, ...rest] = pointer.split("/").slice(1);
-	switch (head) {
-		case "title":
-			return "the title";
-		case "subtitle":
-			return "the subtitle";
-		case "background":
-			return "the background";
-		case "search":
-			return "the search box";
-		case "sections":
-			return describeSection(rest, document);
-		default:
-			return "the homepage";
+	const segments = pointer.split("/").slice(1);
+	if (segments[0] === "sections") {
+		return describeSection(segments.slice(1), document);
 	}
+	return `the ${segments.map(humanize).join(" ")}`;
 }
 
 function describeSection(rest: string[], document: HomeConfig): string {
-	const [index, field, linkIndex, linkField] = rest;
+	const [index, field, linkIndex, ...linkPath] = rest;
 	const section = document.sections?.[Number(index)];
-	const name = section?.label ? `“${section.label}”` : "a section";
+	const sectionName = section?.label ? `“${section.label}”` : "a section";
 
 	if (field === "links") {
 		const link = section?.links?.[Number(linkIndex)];
 		const linkName = link?.label ? `“${link.label}”` : "a link";
-		if (linkField === "label") return `the name of a link in section ${name}`;
-		if (linkField === "url")
-			return `the URL of link ${linkName} in section ${name}`;
-		return `link ${linkName} in section ${name}`;
+		const container = `link ${linkName} in section ${sectionName}`;
+		return linkPath.length
+			? `the ${linkPath.map(humanize).join(" ")} of ${container}`
+			: container;
 	}
 
-	if (field === "label") return `the name of section ${name}`;
-	if (field === "hidden") return `the visibility of section ${name}`;
-	return `section ${name}`;
+	return field
+		? `the ${humanize(field)} of section ${sectionName}`
+		: `section ${sectionName}`;
+}
+
+function humanize(field: string): string {
+	return field.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
 }
 
 function preview(value: unknown): string {

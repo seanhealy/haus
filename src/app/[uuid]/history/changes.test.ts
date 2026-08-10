@@ -64,7 +64,24 @@ describe("describeChanges()", () => {
 				{
 					kind: "changed",
 					description:
-						"Changed the URL of link “MDN” in section “Dev” to “https://developer.mozilla.org”",
+						"Changed the url of link “MDN” in section “Dev” to “https://developer.mozilla.org”",
+				},
+			]);
+		});
+	});
+
+	describe("when a link's icon size changes", () => {
+		it("names the nested icon field", () => {
+			const before = makeConfig();
+			before.sections[0].links[0].icon = { scale: 1 };
+			const after = structuredClone(before);
+			after.sections[0].links[0].icon = { scale: 0.7 };
+
+			expect(describeChanges(before, after)).toEqual([
+				{
+					kind: "changed",
+					description:
+						"Changed the icon scale of link “GitHub” in section “Dev” to 0.7",
 				},
 			]);
 		});
