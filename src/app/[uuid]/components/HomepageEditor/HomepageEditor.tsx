@@ -15,7 +15,6 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import type { HomeConfig, QuickLink, Section } from "@/app/types";
 import { saveHomepage } from "../../actions";
@@ -82,7 +81,6 @@ function removeAt<Item>(items: Item[], index: number): Item[] {
 }
 
 export function HomepageEditor({ uuid, initial }: Props) {
-	const router = useRouter();
 	const [config, setConfig] = useState<HomeConfig>(initial);
 	const [lastSavedConfig, setLastSavedConfig] = useState<HomeConfig>(initial);
 	const [error, setError] = useState<string | null>(null);
@@ -118,7 +116,7 @@ export function HomepageEditor({ uuid, initial }: Props) {
 	);
 
 	function discard() {
-		router.push(`/${uuid}`);
+		window.location.assign(`/${uuid}`);
 	}
 
 	function save() {
@@ -128,7 +126,7 @@ export function HomepageEditor({ uuid, initial }: Props) {
 			const result = await saveHomepage(uuid, snapshot);
 			if (result.ok) {
 				setLastSavedConfig(snapshot);
-				router.push(`/${uuid}`);
+				window.location.assign(`/${uuid}`);
 			} else {
 				setError(result.error);
 			}
