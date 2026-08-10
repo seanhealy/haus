@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CheckIcon, XIcon } from "../icons";
 import styles from "./styles.module.css";
 
@@ -12,6 +13,7 @@ function normalizeUrl(value: string): string {
 }
 
 type Props = {
+	uuid: string;
 	backgroundImage: string;
 	onBackgroundChange: (value: string) => void;
 	searchUrl: string;
@@ -23,6 +25,7 @@ type Props = {
 };
 
 export function EditToolbar({
+	uuid,
 	backgroundImage,
 	onBackgroundChange,
 	searchUrl,
@@ -47,6 +50,9 @@ export function EditToolbar({
 			/>
 			{error ? <span className={styles.error}>{error}</span> : null}
 			<div className={styles.actions}>
+				<Link className={styles.history} href={`/${uuid}/history`}>
+					History
+				</Link>
 				<button
 					type="button"
 					className={styles.button}

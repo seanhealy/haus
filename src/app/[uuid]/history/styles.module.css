@@ -1,0 +1,100 @@
+.root {
+	width: var(--content-width);
+	max-width: 100%;
+	padding: 2.5rem 1rem 4rem;
+	margin: 0 auto;
+}
+
+.header {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 1rem;
+	align-items: baseline;
+	justify-content: space-between;
+	margin-bottom: 2rem;
+}
+
+.title {
+	font-size: 1.5rem;
+	font-weight: 700;
+}
+
+.back {
+	font-size: 0.9rem;
+	color: var(--onSurface);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+	opacity: 0.75;
+}
+
+.back:hover {
+	opacity: 1;
+}
+
+.entries {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	list-style: none;
+}
+
+.entry {
+	padding-bottom: 1.25rem;
+	border-bottom: 1px solid color-mix(in srgb, var(--onSurface) 15%, transparent);
+}
+
+.entry:last-child {
+	border-bottom: 0;
+}
+
+.time {
+	display: block;
+	margin-bottom: 0.5rem;
+	font-size: 0.8rem;
+	letter-spacing: 0.02em;
+	opacity: 0.6;
+}
+
+.note {
+	font-size: 0.95rem;
+	opacity: 0.75;
+}
+
+.changes {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	list-style: none;
+}
+
+.changes li {
+	position: relative;
+	padding-left: 1.1rem;
+	font-size: 0.95rem;
+}
+
+.changes li::before {
+	position: absolute;
+	left: 0;
+	font-weight: 700;
+}
+
+.added::before {
+	color: #6ee7a8;
+	content: "+";
+}
+
+.removed::before {
+	color: #f2a0a0;
+	content: "−";
+}
+
+.moved::before {
+	content: "↕";
+	opacity: 0.7;
+}
+
+.changed::before {
+	color: #e6c66e;
+	content: "~";
+}

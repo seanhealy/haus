@@ -1,0 +1,75 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { HomepageRepository } from "@/db/repositories";
+import { isUuid } from "@/utilities/isUuid";
+import { describeChanges } from "./changes";
+import styles from "./styles.module.css";
+
+type Props = {
+	params: Promise<{ uuid: string }>;
+};
+
+const timestamp = new Intl.DateTimeFormat("en-US", {
+	dateStyle: "medium",
+	timeStyle: "short",
+	timeZone: "UTC",
+});
+
+export default async function HistoryPage({ params }: Props) {
+	const { uuid } = await params;
+	if (!isUuid(uuid)) notFound();
+
+	const revisions = await HomepageRepository.listRevisions(uuid);
+	if (revisions.length === 0) notFound();
+
+	const entries = revisions
+		.map((revision, index) => ({
+			id: revision.id,
+			createdAt: revision.createdAt,
+			changes:
+				index === 0
+					? null
+					: describeChanges(revisions[index - 1].config, revision.config),
+		}))
+		.reverse();
+
+	return (
+		<main className={styles.root}>
+			<header className={styles.header}>
+				<h1 className={styles.title}>History</h1>
+				<Link className={styles.back} href={`/${uuid}`}>
+					Back to homepage
+				</Link>
+			</header>
+
+			<ol className={styles.entries}>
+				{entries.map((entry) => (
+					<li key={entry.id} className={styles.entry}>
+						<time
+							className={styles.time}
+							dateTime={entry.createdAt.toISOString()}
+						>
+							{timestamp.format(entry.createdAt)} UTC
+						</time>
+						{entry.changes === null ? (
+							<p className={styles.note}>Created</p>
+						) : entry.changes.length === 0 ? (
+							<p className={styles.note}>Saved with no changes</p>
+						) : (
+							<ul className={styles.changes}>
+								{entry.changes.map((change, index) => (
+									<li
+										key={`${change.kind}-${index}`}
+										className={styles[change.kind]}
+									>
+										{change.description}
+									</li>
+								))}
+							</ul>
+						)}
+					</li>
+				))}
+			</ol>
+		</main>
+	);
+}
