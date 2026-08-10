@@ -30,14 +30,26 @@ describe("suggestions", () => {
 		});
 
 		describe("when the query is provided", () => {
-			it("offers the search row first", () => {
-				const [first] = buildSuggestions("cats", [], []);
+			it("offers the search row last, below any matches", () => {
+				const suggestions = buildSuggestions("cats", [], []);
+				const last = suggestions[suggestions.length - 1];
 
-				expect(first).toEqual({
+				expect(last).toEqual({
 					kind: "search",
 					label: 'Search for "cats"',
 					query: "cats",
 				});
+			});
+
+			it("orders matches above the search row", () => {
+				const sections = [
+					makeSection({ links: [makeLink({ label: "GitHub" })] }),
+				];
+				const kinds = buildSuggestions("git", ["gitlab"], sections).map(
+					(suggestion) => suggestion.kind,
+				);
+
+				expect(kinds).toEqual(["link", "recent", "search"]);
 			});
 		});
 
