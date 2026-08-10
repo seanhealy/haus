@@ -1,0 +1,22 @@
+.skeleton {
+	display: inline-block;
+	width: 7rem;
+	max-width: 40vw;
+	height: 0.7rem;
+	vertical-align: middle;
+	background: color-mix(in srgb, var(--onSurface) 35%, transparent);
+	border-radius: 0.2rem;
+	animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+	50% {
+		opacity: 0.4;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.skeleton {
+		animation: none;
+	}
+}

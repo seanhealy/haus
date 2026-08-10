@@ -11,8 +11,8 @@ export async function generateStaticParams() {
 }
 
 export default async function App({ params }: Props) {
-	const { uuid, config } = await loadHomepageOr404(params);
+	const { uuid, config, modifiedAt } = await loadHomepageOr404(params);
 
 	preload(config.background.image, { as: "image", fetchPriority: "high" });
-	return <HomepageView uuid={uuid} config={config} />;
+	return <HomepageView uuid={uuid} config={config} modifiedAt={modifiedAt} />;
 }

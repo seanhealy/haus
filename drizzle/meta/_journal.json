@@ -8,6 +8,13 @@
 			"when": 1777838045819,
 			"tag": "0000_daffy_jackal",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1786340705795,
+			"tag": "0001_bored_squirrel_girl",
+			"breakpoints": true
 		}
 	]
 }
