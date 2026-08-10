@@ -6,7 +6,12 @@ import {
 	ComboboxOption,
 	ComboboxOptions,
 } from "@headlessui/react";
-import { useEffect, useRef, useState } from "react";
+import {
+	type KeyboardEvent as ReactKeyboardEvent,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { QuickLinkIcon } from "@/app/components/QuickLinkIcon";
 import type { SearchConfig, Section } from "@/app/types";
 import { readRecents, recentsStorageKey, rememberSearch } from "./recents";
@@ -81,44 +86,83 @@ export function SearchBar({ config, sections, uuid }: Props) {
 	return (
 		<div className={styles.root} role="search">
 			<Combobox<Suggestion | null> onChange={handleSelect}>
-				<ComboboxInput
-					className={styles.input}
-					placeholder={config.placeholder ?? "Search"}
-					aria-label="Search"
-					autoComplete="off"
-					autoCapitalize="none"
-					autoCorrect="off"
-					spellCheck={false}
-					autoFocus
-					onChange={(event) => setQuery(event.target.value)}
-				/>
-				<ComboboxOptions anchor="bottom start" className={styles.options}>
-					{suggestions.map((suggestion) => {
-						const meta = metaLabel(suggestion);
-						return (
-							<ComboboxOption
-								key={suggestionKey(suggestion)}
-								value={suggestion}
-								className={styles.option}
-							>
-								<QuickLinkIcon
-									url={suggestion.kind === "link" ? suggestion.url : config.url}
-									icon={
-										suggestion.kind === "link" ? suggestion.icon : undefined
-									}
-									size={ICON_SIZE}
-								/>
-								<span className={styles.optionText}>
-									{meta ? (
-										<span className={styles.optionMeta}>{meta}</span>
-									) : null}
-									<span className={styles.optionLabel}>{suggestion.label}</span>
-								</span>
-							</ComboboxOption>
-						);
-					})}
-				</ComboboxOptions>
+				{({ activeIndex }) => (
+					<>
+						<ComboboxInput
+							className={styles.input}
+							placeholder={config.placeholder ?? "Search"}
+							aria-label="Search"
+							autoComplete="off"
+							autoCapitalize="none"
+							autoCorrect="off"
+							spellCheck={false}
+							autoFocus
+							onChange={(event) => setQuery(event.target.value)}
+							onKeyDownCapture={(event) =>
+								wrapArrowNavigation(event, activeIndex, suggestions.length)
+							}
+						/>
+						<ComboboxOptions anchor="bottom start" className={styles.options}>
+							{suggestions.map((suggestion) => {
+								const meta = metaLabel(suggestion);
+								return (
+									<ComboboxOption
+										key={suggestionKey(suggestion)}
+										value={suggestion}
+										className={styles.option}
+									>
+										<QuickLinkIcon
+											url={
+												suggestion.kind === "link" ? suggestion.url : config.url
+											}
+											icon={
+												suggestion.kind === "link" ? suggestion.icon : undefined
+											}
+											size={ICON_SIZE}
+										/>
+										<span className={styles.optionText}>
+											{meta ? (
+												<span className={styles.optionMeta}>{meta}</span>
+											) : null}
+											<span className={styles.optionLabel}>
+												{suggestion.label}
+											</span>
+										</span>
+									</ComboboxOption>
+								);
+							})}
+						</ComboboxOptions>
+					</>
+				)}
 			</Combobox>
 		</div>
+	);
+}
+
+// Headless UI clamps at the ends, so at a boundary we synthesize the Home/End
+// key it maps to the opposite end. Done in the capture phase, before Headless's
+// own bubble handler runs and consumes the arrow.
+function wrapArrowNavigation(
+	event: ReactKeyboardEvent<HTMLInputElement>,
+	activeIndex: number | null,
+	count: number,
+) {
+	if (activeIndex === null) return;
+	let jumpTo: "Home" | "End" | null = null;
+	if (event.key === "ArrowDown" && activeIndex === count - 1) {
+		jumpTo = "Home";
+	} else if (event.key === "ArrowUp" && activeIndex === 0) {
+		jumpTo = "End";
+	}
+	if (!jumpTo) return;
+
+	event.preventDefault();
+	event.stopPropagation();
+	event.currentTarget.dispatchEvent(
+		new KeyboardEvent("keydown", {
+			key: jumpTo,
+			bubbles: true,
+			cancelable: true,
+		}),
 	);
 }

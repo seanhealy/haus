@@ -79,9 +79,7 @@
 	opacity: 0.55;
 }
 
-/* The fallback search row is always last; divide it from the matches above.
-   The divider sits in the top margin (via ::before) so the row keeps its
-   normal padding and rounded highlight, spaced away from the line. */
+/* Divider drawn in the top margin so the row's highlight keeps a gap from it. */
 .option:last-child:not(:only-child) {
 	position: relative;
 	margin-top: 0.85rem;
