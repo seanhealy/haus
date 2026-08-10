@@ -15,9 +15,10 @@ import styles from "./styles.module.css";
 type Props = {
 	uuid: string;
 	config: HomeConfig;
+	modifiedAt: Date;
 };
 
-export function HomepageView({ uuid, config }: Props) {
+export function HomepageView({ uuid, config, modifiedAt }: Props) {
 	const { title, subtitle, background, search, sections } = config;
 
 	return (
@@ -44,13 +45,18 @@ export function HomepageView({ uuid, config }: Props) {
 				<SectionsRestoreScript uuid={uuid} />
 			</section>
 
-			<Link
-				className={styles.editLink}
-				href={`/${uuid}/edit`}
-				aria-label="Edit"
-			>
-				<PencilIcon />
-			</Link>
+			<div className={styles.editBar}>
+				<time className={styles.editedAt} dateTime={modifiedAt.toISOString()}>
+					{modifiedAt.toISOString()}
+				</time>
+				<Link
+					className={styles.editLink}
+					href={`/${uuid}/edit`}
+					aria-label="Edit"
+				>
+					<PencilIcon />
+				</Link>
+			</div>
 		</HomepageBackdrop>
 	);
 }

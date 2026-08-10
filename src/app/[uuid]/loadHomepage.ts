@@ -7,12 +7,12 @@ import { isUuid } from "@/utilities/isUuid";
 // rendering the 404 page if either fails.
 export async function loadHomepageOr404(
 	params: Promise<{ uuid: string }>,
-): Promise<{ uuid: string; config: HomeConfig }> {
+): Promise<{ uuid: string; config: HomeConfig; modifiedAt: Date }> {
 	const { uuid } = await params;
 	if (!isUuid(uuid)) notFound();
 
-	const config = await HomepageRepository.findById(uuid);
-	if (!config) notFound();
+	const homepage = await HomepageRepository.findById(uuid);
+	if (!homepage) notFound();
 
-	return { uuid, config };
+	return { uuid, config: homepage.config, modifiedAt: homepage.modifiedAt };
 }

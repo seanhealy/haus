@@ -1,8 +1,23 @@
-.editLink {
+.editBar {
 	position: fixed;
 	right: 1rem;
 	bottom: 1rem;
 	z-index: 3;
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.editedAt {
+	font-size: 0.7rem;
+	font-variant-numeric: tabular-nums;
+	color: var(--onSurface);
+	white-space: nowrap;
+	opacity: 0.6;
+	filter: var(--drop-shadow);
+}
+
+.editLink {
 	display: flex;
 	align-items: center;
 	justify-content: center;

@@ -10,14 +10,19 @@ export type HomepageRevision = {
 };
 
 export const HomepageRepository = {
-	async findById(id: string): Promise<HomeConfig | null> {
+	async findById(
+		id: string,
+	): Promise<{ config: HomeConfig; modifiedAt: Date } | null> {
 		const [row] = await db
-			.select({ config: homepages.config })
+			.select({ config: homepages.config, modifiedAt: homepages.modifiedAt })
 			.from(homepages)
 			.where(eq(homepages.id, id))
 			.limit(1);
 		if (!row) return null;
-		return homeConfigSchema.parse(row.config);
+		return {
+			config: homeConfigSchema.parse(row.config),
+			modifiedAt: row.modifiedAt,
+		};
 	},
 
 	async create(config: HomeConfig): Promise<{ id: string }> {
