@@ -1,6 +1,9 @@
 import Link from "next/link";
 import type { HomeConfig, Section } from "@/app/types";
-import { CollapsibleSection } from "../CollapsibleSection";
+import {
+	CollapsibleSection,
+	SectionsRestoreScript,
+} from "../CollapsibleSection";
 import { HomepageBackdrop } from "../HomepageBackdrop";
 import layout from "../HomepageBackdrop/styles.module.css";
 import { PencilIcon } from "../icons";
@@ -12,10 +15,9 @@ import styles from "./styles.module.css";
 type Props = {
 	uuid: string;
 	config: HomeConfig;
-	openSections: Record<string, boolean>;
 };
 
-export function HomepageView({ uuid, config, openSections }: Props) {
+export function HomepageView({ uuid, config }: Props) {
 	const { title, subtitle, background, search, sections } = config;
 
 	return (
@@ -36,14 +38,10 @@ export function HomepageView({ uuid, config, openSections }: Props) {
 					{sections
 						.filter((section) => !section.hidden)
 						.map((section) => (
-							<SectionLinks
-								key={section.id}
-								uuid={uuid}
-								section={section}
-								defaultOpen={openSections[section.id] ?? true}
-							/>
+							<SectionLinks key={section.id} uuid={uuid} section={section} />
 						))}
 				</div>
+				<SectionsRestoreScript uuid={uuid} />
 			</section>
 
 			<Link
@@ -60,10 +58,9 @@ export function HomepageView({ uuid, config, openSections }: Props) {
 type SectionLinksProps = {
 	uuid: string;
 	section: Section;
-	defaultOpen: boolean;
 };
 
-function SectionLinks({ uuid, section, defaultOpen }: SectionLinksProps) {
+function SectionLinks({ uuid, section }: SectionLinksProps) {
 	const links = (
 		<nav
 			className={sectionStyles.quicklinks}
@@ -82,7 +79,6 @@ function SectionLinks({ uuid, section, defaultOpen }: SectionLinksProps) {
 			uuid={uuid}
 			sectionId={section.id}
 			label={section.label}
-			defaultOpen={defaultOpen}
 		>
 			{links}
 		</CollapsibleSection>
