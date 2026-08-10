@@ -79,7 +79,6 @@
 	opacity: 0.55;
 }
 
-/* Separator above the fallback search row, dividing it from the matches. */
 .optionSeparated {
 	padding-top: 0.55rem;
 	margin-top: 0.3rem;
