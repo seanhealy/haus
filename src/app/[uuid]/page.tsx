@@ -6,9 +6,8 @@ type Props = {
 	params: Promise<{ uuid: string }>;
 };
 
-export const revalidate = 3600;
-
-// Empty array opts the route into on-demand ISR; ids aren't known at build.
+// Empty array opts the route into on-demand ISR instead of dynamic rendering.
+// No revalidate: pages cache until the save action invalidates them on edit.
 export async function generateStaticParams() {
 	return [];
 }

@@ -1,8 +1,7 @@
 import { sectionsCookieName } from "../../sectionsCookie";
 
-// Authored readably and inlined via toString(); the production build minifies
-// it. Must stay self-contained (no closure refs) and take no interpolated input
-// — the cookie name comes from a data attribute — so it's injection-free.
+// Must stay self-contained (no closure refs, so toString captures it) and free
+// of interpolated input, so it can't become an injection vector.
 function restoreSections() {
 	const script = document.currentScript as HTMLScriptElement | null;
 	if (!script) return;

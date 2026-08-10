@@ -8,9 +8,8 @@ type Props = {
 	sectionId: string;
 };
 
-// Restores the saved state on mount (covers soft navigations, where the
-// pre-paint script doesn't run) and writes the cookie on toggle. The empty
-// anchor exists only to locate the parent <details>.
+// Also restores on mount because soft navigations don't run the pre-paint
+// script. The hidden anchor exists only to locate the parent <details>.
 export function SectionOpenPersister({ uuid, sectionId }: Props) {
 	const anchor = useRef<HTMLSpanElement>(null);
 

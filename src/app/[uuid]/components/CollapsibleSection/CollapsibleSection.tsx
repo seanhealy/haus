@@ -9,8 +9,7 @@ type Props = {
 	children: ReactNode;
 };
 
-// `open` is intentionally uncontrolled — saved state is applied outside React
-// (pre-paint script + mount effect), so React must not own or rehydrate it.
+// Leave `open` uncontrolled so React won't fight the out-of-band restore.
 export function CollapsibleSection({
 	uuid,
 	sectionId,
