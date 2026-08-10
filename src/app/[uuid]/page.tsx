@@ -6,12 +6,9 @@ type Props = {
 	params: Promise<{ uuid: string }>;
 };
 
-// Each homepage is prerendered and cached (ISR); the save action revalidates
-// its path on edit. A time-based backstop catches any change that bypasses it.
 export const revalidate = 3600;
 
-// Prerender nothing at build (ids aren't known then); the empty array opts each
-// homepage into on-demand static generation, cached and reused after first hit.
+// Empty array opts the route into on-demand ISR; ids aren't known at build.
 export async function generateStaticParams() {
 	return [];
 }

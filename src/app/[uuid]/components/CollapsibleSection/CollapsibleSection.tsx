@@ -9,9 +9,8 @@ type Props = {
 	children: ReactNode;
 };
 
-// Sections default to open; the initial open/closed state is driven outside
-// React (SectionsRestoreScript before paint, SectionOpenPersister on mount),
-// so `open` is left uncontrolled and hydration is suppressed for it.
+// `open` is intentionally uncontrolled — saved state is applied outside React
+// (pre-paint script + mount effect), so React must not own or rehydrate it.
 export function CollapsibleSection({
 	uuid,
 	sectionId,

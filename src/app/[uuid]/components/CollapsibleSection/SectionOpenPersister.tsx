@@ -8,10 +8,9 @@ type Props = {
 	sectionId: string;
 };
 
-// The <details> collapses natively with no JS. This island restores the saved
-// state on mount (covering soft navigations, where the pre-paint restore script
-// doesn't run) and remembers later changes by writing the cookie on toggle. It
-// renders an empty anchor so it can find the <details> it lives in.
+// Restores the saved state on mount (covers soft navigations, where the
+// pre-paint script doesn't run) and writes the cookie on toggle. The empty
+// anchor exists only to locate the parent <details>.
 export function SectionOpenPersister({ uuid, sectionId }: Props) {
 	const anchor = useRef<HTMLSpanElement>(null);
 
