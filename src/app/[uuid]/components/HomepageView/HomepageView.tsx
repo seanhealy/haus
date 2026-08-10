@@ -10,6 +10,7 @@ import { PencilIcon } from "../icons";
 import { LinkTile } from "../LinkTile";
 import { SearchBar } from "../SearchBar";
 import sectionStyles from "../SectionView/styles.module.css";
+import { RelativeTime } from "./RelativeTime";
 import styles from "./styles.module.css";
 
 type Props = {
@@ -51,9 +52,7 @@ export function HomepageView({ uuid, config, modifiedAt }: Props) {
 					href={`/${uuid}/history`}
 					aria-label="View history"
 				>
-					<time dateTime={modifiedAt.toISOString()}>
-						{modifiedAt.toISOString()}
-					</time>
+					<RelativeTime iso={modifiedAt.toISOString()} />
 				</Link>
 				<Link
 					className={styles.editLink}

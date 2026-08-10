@@ -335,7 +335,6 @@ export function HomepageEditor({ uuid, initial }: Props) {
 							<PlusIcon size={16} />
 						</button>
 						<EditToolbar
-							uuid={uuid}
 							backgroundImage={config.background.image}
 							onBackgroundChange={updateBackgroundImage}
 							searchUrl={config.search?.url ?? ""}

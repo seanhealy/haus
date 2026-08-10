@@ -29,21 +29,6 @@
 .actions {
 	display: flex;
 	gap: 0.5rem;
-	align-items: center;
-}
-
-.history {
-	margin-right: auto;
-	font-size: 0.85rem;
-	color: var(--onSurface);
-	text-decoration: underline;
-	text-underline-offset: 0.2em;
-	opacity: 0.75;
-	filter: var(--drop-shadow);
-}
-
-.history:hover {
-	opacity: 1;
 }
 
 .button {
