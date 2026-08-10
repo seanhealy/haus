@@ -2,8 +2,6 @@ import { parseSectionsCookie, sectionsCookieName } from "./sectionsCookie";
 
 const COOKIE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 365;
 
-// Synchronous read of the saved open/closed state from document.cookie, for
-// restoring section state on the client after a soft navigation.
 export function readSectionsState(uuid: string): Record<string, boolean> {
 	const prefix = `${sectionsCookieName(uuid)}=`;
 	const entry = document.cookie

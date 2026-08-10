@@ -1,7 +1,5 @@
 import { sectionsCookieName } from "../../sectionsCookie";
 
-// Must stay self-contained (no closure refs, so toString captures it) and free
-// of interpolated input, so it can't become an injection vector.
 function restoreSections() {
 	const script = document.currentScript as HTMLScriptElement | null;
 	if (!script) return;

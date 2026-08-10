@@ -8,8 +8,6 @@ type Props = {
 	sectionId: string;
 };
 
-// Also restores on mount because soft navigations don't run the pre-paint
-// script. The hidden anchor exists only to locate the parent <details>.
 export function SectionOpenPersister({ uuid, sectionId }: Props) {
 	const anchor = useRef<HTMLSpanElement>(null);
 

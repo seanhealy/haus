@@ -9,7 +9,6 @@ type Props = {
 	children: ReactNode;
 };
 
-// Leave `open` uncontrolled so React won't fight the out-of-band restore.
 export function CollapsibleSection({
 	uuid,
 	sectionId,
