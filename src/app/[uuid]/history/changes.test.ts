@@ -82,6 +82,44 @@ describe("describeChanges()", () => {
 		});
 	});
 
+	describe("with several structural edits in one save", () => {
+		it("attributes each change to the right link despite shifting indices", () => {
+			const before: HomeConfig = {
+				background: { image: "https://example.com/bg.png" },
+				sections: [
+					{
+						id: "s1",
+						label: "Dev",
+						links: [
+							{ id: "l1", label: "A", url: "https://a.example" },
+							{ id: "l2", label: "B", url: "https://b.example" },
+							{ id: "l3", label: "C", url: "https://c.example" },
+							{ id: "l4", label: "D", url: "https://d.example" },
+						],
+					},
+				],
+			};
+			const after = structuredClone(before);
+			const [, b, c, d] = after.sections[0].links;
+			// Remove A and move D to the front.
+			after.sections[0].links = [d, b, c];
+
+			const changes = describeChanges(before, after);
+
+			expect(changes).toContainEqual({
+				kind: "removed",
+				description: "Removed link “A” in section “Dev”",
+			});
+			expect(changes).toContainEqual({
+				kind: "moved",
+				description: "Reordered link “D” in section “Dev”",
+			});
+			expect(changes.some((change) => change.description.includes("“C”"))).toBe(
+				false,
+			);
+		});
+	});
+
 	describe("when a whole section is removed", () => {
 		it("names the removed section", () => {
 			const after = makeConfig();

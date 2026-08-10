@@ -1,5 +1,5 @@
 import { create } from "jsondiffpatch";
-import { format, type Op } from "jsondiffpatch/formatters/jsonpatch";
+import { format, type Op, patch } from "jsondiffpatch/formatters/jsonpatch";
 import type { HomeConfig } from "@/app/types";
 
 export type ChangeKind = "added" | "removed" | "moved" | "changed";
@@ -18,32 +18,45 @@ export function describeChanges(
 ): Change[] {
 	const delta = differ.diff(before, after);
 	if (!delta) return [];
-	return format(delta).map((op) => describeOp(op, before, after));
+
+	const working = structuredClone(before);
+	return format(delta).map((op) => {
+		if (op.op === "add") {
+			patch(working, [op]);
+			return describeOp(op, working);
+		}
+		const change = describeOp(op, working);
+		patch(working, [op]);
+		return change;
+	});
 }
 
-function describeOp(op: Op, before: HomeConfig, after: HomeConfig): Change {
+function describeOp(op: Op, document: HomeConfig): Change {
 	switch (op.op) {
 		case "add":
-			return { kind: "added", description: `Added ${target(op.path, after)}` };
+			return {
+				kind: "added",
+				description: `Added ${target(op.path, document)}`,
+			};
 		case "remove":
 			return {
 				kind: "removed",
-				description: `Removed ${target(op.path, before)}`,
+				description: `Removed ${target(op.path, document)}`,
 			};
 		case "move":
 			return {
 				kind: "moved",
-				description: `Reordered ${target(op.from, before)}`,
+				description: `Reordered ${target(op.from, document)}`,
 			};
 		case "replace":
 			return {
 				kind: "changed",
-				description: `Changed ${target(op.path, after)}${preview(op.value)}`,
+				description: `Changed ${target(op.path, document)}${preview(op.value)}`,
 			};
 	}
 }
 
-function target(pointer: string, config: HomeConfig): string {
+function target(pointer: string, document: HomeConfig): string {
 	const [head, ...rest] = pointer.split("/").slice(1);
 	switch (head) {
 		case "title":
@@ -55,15 +68,15 @@ function target(pointer: string, config: HomeConfig): string {
 		case "search":
 			return "the search box";
 		case "sections":
-			return describeSection(rest, config);
+			return describeSection(rest, document);
 		default:
 			return "the homepage";
 	}
 }
 
-function describeSection(rest: string[], config: HomeConfig): string {
+function describeSection(rest: string[], document: HomeConfig): string {
 	const [index, field, linkIndex, linkField] = rest;
-	const section = config.sections?.[Number(index)];
+	const section = document.sections?.[Number(index)];
 	const name = section?.label ? `“${section.label}”` : "a section";
 
 	if (field === "links") {
