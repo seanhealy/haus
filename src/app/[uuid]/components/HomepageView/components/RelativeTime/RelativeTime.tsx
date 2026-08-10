@@ -7,23 +7,21 @@ const REFRESH_MS = 60 * 1000;
 
 const relativeFormat = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
-const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
-	["second", 60],
+const DIVISIONS: [Intl.RelativeTimeFormatUnit, number][] = [
+	["year", 60 * 60 * 24 * 365],
+	["month", 60 * 60 * 24 * 30],
+	["day", 60 * 60 * 24],
+	["hour", 60 * 60],
 	["minute", 60],
-	["hour", 24],
-	["day", 30],
-	["month", 12],
+	["second", 1],
 ];
 
 function relativeLabel(iso: string): string {
-	let value = (new Date(iso).getTime() - Date.now()) / 1000;
-	for (const [unit, size] of UNITS) {
-		if (Math.abs(value) < size) {
-			return relativeFormat.format(Math.round(value), unit);
-		}
-		value /= size;
-	}
-	return relativeFormat.format(Math.round(value), "year");
+	const seconds = (new Date(iso).getTime() - Date.now()) / 1000;
+	const [unit, perUnit]: [Intl.RelativeTimeFormatUnit, number] = DIVISIONS.find(
+		([, size]) => Math.abs(seconds) >= size,
+	) ?? ["second", 1];
+	return relativeFormat.format(Math.round(seconds / perUnit), unit);
 }
 
 export function RelativeTime({ iso }: { iso: string }) {

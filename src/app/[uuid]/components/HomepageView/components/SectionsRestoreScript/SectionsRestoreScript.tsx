@@ -21,11 +21,13 @@ function restoreSections() {
 		}
 	}
 
-	for (const section of document.querySelectorAll("details[data-section-id]")) {
-		const id = section.getAttribute("data-section-id");
-		const saved = id !== null && Object.hasOwn(state, id) ? !!state[id] : true;
-		(section as HTMLDetailsElement).open = saved;
-	}
+	document
+		.querySelectorAll<HTMLDetailsElement>("details[data-section-id]")
+		.forEach((section) => {
+			const id = section.getAttribute("data-section-id");
+			section.open =
+				id !== null && Object.hasOwn(state, id) ? !!state[id] : true;
+		});
 }
 
 const RESTORE_SECTIONS = `(${restoreSections.toString()})();`;
