@@ -93,13 +93,18 @@ export function SearchBar({ config, sections, uuid }: Props) {
 					onChange={(event) => setQuery(event.target.value)}
 				/>
 				<ComboboxOptions anchor="bottom start" className={styles.options}>
-					{suggestions.map((suggestion) => {
+					{suggestions.map((suggestion, index) => {
 						const meta = metaLabel(suggestion);
+						// Divide the fallback search row from the matches listed
+						// above it — only when there are matches above it.
+						const separated = suggestion.kind === "search" && index > 0;
 						return (
 							<ComboboxOption
 								key={suggestionKey(suggestion)}
 								value={suggestion}
-								className={styles.option}
+								className={`${styles.option}${
+									separated ? ` ${styles.optionSeparated}` : ""
+								}`}
 							>
 								<QuickLinkIcon
 									url={suggestion.kind === "link" ? suggestion.url : config.url}
