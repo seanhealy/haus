@@ -13,8 +13,16 @@
 	font-variant-numeric: tabular-nums;
 	color: var(--onSurface);
 	white-space: nowrap;
+	text-decoration: none;
 	opacity: 0.6;
 	filter: var(--drop-shadow);
+	transition: opacity 0.12s ease;
+}
+
+.editedAt:hover {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+	opacity: 1;
 }
 
 .editLink {

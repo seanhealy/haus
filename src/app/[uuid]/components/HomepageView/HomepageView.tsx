@@ -46,9 +46,15 @@ export function HomepageView({ uuid, config, modifiedAt }: Props) {
 			</section>
 
 			<div className={styles.editBar}>
-				<time className={styles.editedAt} dateTime={modifiedAt.toISOString()}>
-					{modifiedAt.toISOString()}
-				</time>
+				<Link
+					className={styles.editedAt}
+					href={`/${uuid}/history`}
+					aria-label="View history"
+				>
+					<time dateTime={modifiedAt.toISOString()}>
+						{modifiedAt.toISOString()}
+					</time>
+				</Link>
 				<Link
 					className={styles.editLink}
 					href={`/${uuid}/edit`}
