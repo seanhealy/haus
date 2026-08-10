@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { HomepageRepository } from "@/db/repositories";
 import { isUuid } from "@/utilities/isUuid";
 import { describeChanges } from "./changes";
+import { LocalTime } from "./components/LocalTime";
 import styles from "./styles.module.css";
 
 type Props = {
@@ -10,12 +11,6 @@ type Props = {
 };
 
 const PAGE_SIZE = 25;
-
-const timestamp = new Intl.DateTimeFormat("en-US", {
-	dateStyle: "medium",
-	timeStyle: "short",
-	timeZone: "UTC",
-});
 
 export default async function HistoryPage({ params }: Props) {
 	const { uuid } = await params;
@@ -58,12 +53,10 @@ export default async function HistoryPage({ params }: Props) {
 				<ol className={styles.entries}>
 					{entries.map((entry) => (
 						<li key={entry.id} className={styles.entry}>
-							<time
+							<LocalTime
 								className={styles.time}
-								dateTime={entry.createdAt.toISOString()}
-							>
-								{timestamp.format(entry.createdAt)} UTC
-							</time>
+								iso={entry.createdAt.toISOString()}
+							/>
 							{entry.changes === null ? (
 								<p className={styles.note}>Created</p>
 							) : entry.changes.length === 0 ? (
