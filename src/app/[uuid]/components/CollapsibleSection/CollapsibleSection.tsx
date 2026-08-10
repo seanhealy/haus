@@ -6,7 +6,6 @@ type Props = {
 	uuid: string;
 	sectionId: string;
 	label: string;
-	defaultOpen: boolean;
 	children: ReactNode;
 };
 
@@ -14,11 +13,14 @@ export function CollapsibleSection({
 	uuid,
 	sectionId,
 	label,
-	defaultOpen,
 	children,
 }: Props) {
 	return (
-		<details className={sectionStyles.section} open={defaultOpen}>
+		<details
+			className={sectionStyles.section}
+			data-section-id={sectionId}
+			suppressHydrationWarning
+		>
 			<summary className={`${sectionStyles.label} ${sectionStyles.summary}`}>
 				{label}
 			</summary>

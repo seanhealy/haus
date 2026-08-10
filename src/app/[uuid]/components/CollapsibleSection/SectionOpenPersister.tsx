@@ -1,22 +1,22 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { setSectionOpen } from "../../sectionsCookie.client";
+import { readSectionsState, setSectionOpen } from "../../sectionsCookie.client";
 
 type Props = {
 	uuid: string;
 	sectionId: string;
 };
 
-// The <details> collapses natively with no JS. This island's only job is to
-// remember the choice: it listens for the parent's toggle and writes the
-// cookie. It renders an empty anchor so it can find the <details> it lives in.
 export function SectionOpenPersister({ uuid, sectionId }: Props) {
 	const anchor = useRef<HTMLSpanElement>(null);
 
 	useEffect(() => {
 		const details = anchor.current?.closest("details");
 		if (!details) return;
+
+		const saved = readSectionsState(uuid)[sectionId] ?? true;
+		if (details.open !== saved) details.open = saved;
 
 		const persist = () => {
 			setSectionOpen(uuid, sectionId, details.open).catch(() => {});
