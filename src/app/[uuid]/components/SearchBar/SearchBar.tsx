@@ -93,16 +93,13 @@ export function SearchBar({ config, sections, uuid }: Props) {
 					onChange={(event) => setQuery(event.target.value)}
 				/>
 				<ComboboxOptions anchor="bottom start" className={styles.options}>
-					{suggestions.map((suggestion, index) => {
+					{suggestions.map((suggestion) => {
 						const meta = metaLabel(suggestion);
-						const separated = suggestion.kind === "search" && index > 0;
 						return (
 							<ComboboxOption
 								key={suggestionKey(suggestion)}
 								value={suggestion}
-								className={`${styles.option}${
-									separated ? ` ${styles.optionSeparated}` : ""
-								}`}
+								className={styles.option}
 							>
 								<QuickLinkIcon
 									url={suggestion.kind === "link" ? suggestion.url : config.url}

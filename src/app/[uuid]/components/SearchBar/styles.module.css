@@ -79,7 +79,8 @@
 	opacity: 0.55;
 }
 
-.optionSeparated {
+/* The fallback search row is always last; divide it from the matches above. */
+.option:last-child:not(:only-child) {
 	padding-top: 0.55rem;
 	margin-top: 0.3rem;
 	border-top: var(--input-border);
