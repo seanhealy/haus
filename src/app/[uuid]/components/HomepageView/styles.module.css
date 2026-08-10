@@ -10,10 +10,6 @@
 
 .editedAt {
 	font-size: 0.7rem;
-	font-variant-numeric: tabular-nums;
-	color: var(--onSurface);
-	white-space: nowrap;
-	text-decoration: none;
 	filter: var(--drop-shadow);
 }
 
