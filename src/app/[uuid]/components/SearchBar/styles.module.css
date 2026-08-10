@@ -90,7 +90,8 @@
 	right: 0;
 	left: 0;
 	content: "";
-	border-top: 2px dotted var(--onSurface);
+	border-top: var(--input-border);
+	border-top-style: dotted;
 }
 
 .option[data-focus] {
