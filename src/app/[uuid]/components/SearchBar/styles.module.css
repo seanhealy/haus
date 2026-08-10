@@ -79,13 +79,19 @@
 	opacity: 0.55;
 }
 
-/* The fallback search row is always last; divide it from the matches above. */
 .option:last-child:not(:only-child) {
-	padding-top: 0.55rem;
-	margin-top: 0.3rem;
+	position: relative;
+	margin-top: 0.85rem;
+}
+
+.option:last-child:not(:only-child)::before {
+	position: absolute;
+	top: -0.425rem;
+	right: 0;
+	left: 0;
+	content: "";
 	border-top: var(--input-border);
-	border-top-left-radius: 0;
-	border-top-right-radius: 0;
+	border-top-style: dotted;
 }
 
 .option[data-focus] {
