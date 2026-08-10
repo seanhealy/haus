@@ -1,4 +1,4 @@
-import { sectionsCookieName } from "../../sectionsCookie";
+import { sectionsCookieName } from "@/app/[uuid]/sectionsCookie";
 
 function restoreSections() {
 	const script = document.currentScript as HTMLScriptElement | null;

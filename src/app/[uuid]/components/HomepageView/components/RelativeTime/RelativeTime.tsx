@@ -44,7 +44,7 @@ export function RelativeTime({ iso }: { iso: string }) {
 	}, [iso]);
 
 	if (relative === null) {
-		return <span className={styles.editedAtSkeleton} aria-hidden="true" />;
+		return <span className={styles.skeleton} aria-hidden="true" />;
 	}
 
 	return (

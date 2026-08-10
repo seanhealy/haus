@@ -1,16 +1,14 @@
 import Link from "next/link";
 import type { HomeConfig, Section } from "@/app/types";
-import {
-	CollapsibleSection,
-	SectionsRestoreScript,
-} from "../CollapsibleSection";
+import { CollapsibleSection } from "../CollapsibleSection";
 import { HomepageBackdrop } from "../HomepageBackdrop";
 import layout from "../HomepageBackdrop/styles.module.css";
 import { PencilIcon } from "../icons";
 import { LinkTile } from "../LinkTile";
 import { SearchBar } from "../SearchBar";
 import sectionStyles from "../SectionView/styles.module.css";
-import { RelativeTime } from "./RelativeTime";
+import { RelativeTime } from "./components/RelativeTime";
+import { SectionsRestoreScript } from "./components/SectionsRestoreScript";
 import styles from "./styles.module.css";
 
 type Props = {
