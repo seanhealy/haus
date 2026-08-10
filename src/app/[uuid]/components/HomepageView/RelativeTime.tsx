@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import styles from "./styles.module.css";
 
 const relativeFormat = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
@@ -33,18 +34,22 @@ function relativeLabel(iso: string): string {
 }
 
 export function RelativeTime({ iso }: { iso: string }) {
-	const [label, setLabel] = useState(iso);
+	const [relative, setRelative] = useState<string | null>(null);
 
 	useEffect(() => {
-		const update = () => setLabel(relativeLabel(iso));
+		const update = () => setRelative(relativeLabel(iso));
 		update();
 		const interval = setInterval(update, 60_000);
 		return () => clearInterval(interval);
 	}, [iso]);
 
+	if (relative === null) {
+		return <span className={styles.editedAtSkeleton} aria-hidden="true" />;
+	}
+
 	return (
 		<time dateTime={iso} title={iso}>
-			{label}
+			Last edited {relative}
 		</time>
 	);
 }

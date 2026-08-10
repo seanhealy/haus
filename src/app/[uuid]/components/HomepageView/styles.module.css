@@ -18,6 +18,29 @@
 	text-underline-offset: 0.2em;
 }
 
+.editedAtSkeleton {
+	display: inline-block;
+	width: 7rem;
+	max-width: 40vw;
+	height: 0.7rem;
+	vertical-align: middle;
+	background: color-mix(in srgb, var(--onSurface) 35%, transparent);
+	border-radius: 0.2rem;
+	animation: editedAtPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes editedAtPulse {
+	50% {
+		opacity: 0.4;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.editedAtSkeleton {
+		animation: none;
+	}
+}
+
 .editLink {
 	display: flex;
 	align-items: center;
