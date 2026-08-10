@@ -1,3 +1,4 @@
+import { startCase } from "es-toolkit";
 import { create } from "jsondiffpatch";
 import { format, type Op, patch } from "jsondiffpatch/formatters/jsonpatch";
 import type { HomeConfig } from "@/app/types";
@@ -61,7 +62,7 @@ function target(pointer: string, document: HomeConfig): string {
 	if (segments[0] === "sections") {
 		return describeSection(segments.slice(1), document);
 	}
-	return `the ${segments.map(humanize).join(" ")}`;
+	return `the ${startCase(segments.join(" "))}`;
 }
 
 function describeSection(rest: string[], document: HomeConfig): string {
@@ -74,17 +75,13 @@ function describeSection(rest: string[], document: HomeConfig): string {
 		const linkName = link?.label ? `“${link.label}”` : "a link";
 		const container = `link ${linkName} in section ${sectionName}`;
 		return linkPath.length
-			? `the ${linkPath.map(humanize).join(" ")} of ${container}`
+			? `the ${startCase(linkPath.join(" "))} of ${container}`
 			: container;
 	}
 
 	return field
-		? `the ${humanize(field)} of section ${sectionName}`
+		? `the ${startCase(field)} of section ${sectionName}`
 		: `section ${sectionName}`;
-}
-
-function humanize(field: string): string {
-	return field.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
 }
 
 function preview(value: unknown): string {

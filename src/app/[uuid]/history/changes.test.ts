@@ -32,7 +32,54 @@ describe("describeChanges()", () => {
 			after.title = "Homepage";
 
 			expect(describeChanges(makeConfig(), after)).toEqual([
-				{ kind: "changed", description: "Changed the title to “Homepage”" },
+				{ kind: "changed", description: "Changed the Title to “Homepage”" },
+			]);
+		});
+	});
+
+	describe("when the subtitle changes", () => {
+		it("names the subtitle", () => {
+			const before = makeConfig();
+			before.subtitle = "Welcome";
+			const after = structuredClone(before);
+			after.subtitle = "Hello there";
+
+			expect(describeChanges(before, after)).toEqual([
+				{
+					kind: "changed",
+					description: "Changed the Subtitle to “Hello there”",
+				},
+			]);
+		});
+	});
+
+	describe("when the background image changes", () => {
+		it("names the background image", () => {
+			const after = makeConfig();
+			after.background.image = "https://example.com/next.png";
+
+			expect(describeChanges(makeConfig(), after)).toEqual([
+				{
+					kind: "changed",
+					description:
+						"Changed the Background Image to “https://example.com/next.png”",
+				},
+			]);
+		});
+	});
+
+	describe("when the search url changes", () => {
+		it("names the search url", () => {
+			const before = makeConfig();
+			before.search = { url: "https://old.example/?q=%s" };
+			const after = structuredClone(before);
+			after.search = { url: "https://new.example/?q=%s" };
+
+			expect(describeChanges(before, after)).toEqual([
+				{
+					kind: "changed",
+					description: "Changed the Search Url to “https://new.example/?q=%s”",
+				},
 			]);
 		});
 	});
@@ -64,7 +111,22 @@ describe("describeChanges()", () => {
 				{
 					kind: "changed",
 					description:
-						"Changed the url of link “MDN” in section “Dev” to “https://developer.mozilla.org”",
+						"Changed the Url of link “MDN” in section “Dev” to “https://developer.mozilla.org”",
+				},
+			]);
+		});
+	});
+
+	describe("when a link is renamed", () => {
+		it("names the label, link, and section", () => {
+			const after = makeConfig();
+			after.sections[0].links[0].label = "Repo";
+
+			expect(describeChanges(makeConfig(), after)).toEqual([
+				{
+					kind: "changed",
+					description:
+						"Changed the Label of link “GitHub” in section “Dev” to “Repo”",
 				},
 			]);
 		});
@@ -81,7 +143,38 @@ describe("describeChanges()", () => {
 				{
 					kind: "changed",
 					description:
-						"Changed the icon scale of link “GitHub” in section “Dev” to 0.7",
+						"Changed the Icon Scale of link “GitHub” in section “Dev” to 0.7",
+				},
+			]);
+		});
+	});
+
+	describe("when a link's icon background changes", () => {
+		it("names the nested icon colour field", () => {
+			const before = makeConfig();
+			before.sections[0].links[0].icon = { backgroundColor: "#ffffff" };
+			const after = structuredClone(before);
+			after.sections[0].links[0].icon = { backgroundColor: "#000000" };
+
+			expect(describeChanges(before, after)).toEqual([
+				{
+					kind: "changed",
+					description:
+						"Changed the Icon Background Color of link “GitHub” in section “Dev” to “#000000”",
+				},
+			]);
+		});
+	});
+
+	describe("when a section is renamed", () => {
+		it("names the section label", () => {
+			const after = makeConfig();
+			after.sections[0].label = "Work";
+
+			expect(describeChanges(makeConfig(), after)).toEqual([
+				{
+					kind: "changed",
+					description: "Changed the Label of section “Dev” to “Work”",
 				},
 			]);
 		});
