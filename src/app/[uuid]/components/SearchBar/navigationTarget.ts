@@ -26,8 +26,7 @@ export function resolveNavigationTarget(
 		.safeParse(query);
 	if (!parsed.success) return undefined;
 
-	const candidate = candidateUrl(parsed.data);
-	return candidate ? targetFrom(candidate) : undefined;
+	return targetFrom(candidateUrl(parsed.data));
 }
 
 /**
@@ -53,8 +52,10 @@ const TYPED_SCHEME = /^[a-z][a-z0-9+.-]*:(?:\/\/|(?!\d))/i;
 
 const HTTP_SCHEME = /^https?:\/\//i;
 
-function targetFrom(candidate: string): NavigationTarget | undefined {
-	if (!URL.canParse(candidate)) return undefined;
+function targetFrom(
+	candidate: string | undefined,
+): NavigationTarget | undefined {
+	if (!candidate || !URL.canParse(candidate)) return undefined;
 	const url = new URL(candidate);
 	if (url.protocol !== "http:" && url.protocol !== "https:") return undefined;
 	if (url.username || url.password) return undefined;
