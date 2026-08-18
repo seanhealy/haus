@@ -179,7 +179,7 @@ describe("navigationTarget", () => {
 
 		describe("display", () => {
 			describe("with an https target", () => {
-				it("hides the scheme", () => {
+				it("drops the scheme", () => {
 					expect(resolveNavigationTarget("example.com")?.display).toBe(
 						"example.com",
 					);
@@ -187,9 +187,9 @@ describe("navigationTarget", () => {
 			});
 
 			describe("with an http target", () => {
-				it("keeps the scheme visible", () => {
+				it("drops the scheme", () => {
 					expect(resolveNavigationTarget("192.168.1.10:8080")?.display).toBe(
-						"http://192.168.1.10:8080",
+						"192.168.1.10:8080",
 					);
 				});
 			});
@@ -199,6 +199,30 @@ describe("navigationTarget", () => {
 					expect(
 						resolveNavigationTarget("news.ycombinator.com/newest")?.display,
 					).toBe("news.ycombinator.com/newest");
+				});
+			});
+		});
+
+		describe("scheme", () => {
+			describe("with a public host", () => {
+				it("reports https", () => {
+					expect(resolveNavigationTarget("example.com")?.scheme).toBe("https");
+				});
+			});
+
+			describe("with a local host", () => {
+				it("reports http", () => {
+					expect(resolveNavigationTarget("localhost:3000")?.scheme).toBe(
+						"http",
+					);
+				});
+			});
+
+			describe("with an explicitly insecure URL", () => {
+				it("reports http", () => {
+					expect(resolveNavigationTarget("http://example.com")?.scheme).toBe(
+						"http",
+					);
 				});
 			});
 		});

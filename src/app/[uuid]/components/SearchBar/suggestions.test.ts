@@ -133,6 +133,7 @@ describe("suggestions", () => {
 					kind: "url",
 					label: "Go to example.com",
 					url: "https://example.com/",
+					scheme: "https",
 				});
 			});
 
@@ -159,8 +160,9 @@ describe("suggestions", () => {
 			it("leads with the site over http", () => {
 				expect(buildSuggestions("192.168.1.10:8080", [], [])[0]).toEqual({
 					kind: "url",
-					label: "Go to http://192.168.1.10:8080",
+					label: "Go to 192.168.1.10:8080",
 					url: "http://192.168.1.10:8080/",
+					scheme: "http",
 				});
 			});
 		});
@@ -229,15 +231,29 @@ describe("suggestions", () => {
 			});
 		});
 
-		describe("with the url row", () => {
-			it("has no kicker", () => {
+		describe("with a secure url row", () => {
+			it("reads 'https'", () => {
 				expect(
 					metaLabel({
 						kind: "url",
 						label: "Go to example.com",
 						url: "https://example.com/",
+						scheme: "https",
 					}),
-				).toBeNull();
+				).toBe("https");
+			});
+		});
+
+		describe("with an insecure url row", () => {
+			it("reads 'http'", () => {
+				expect(
+					metaLabel({
+						kind: "url",
+						label: "Go to nas.local",
+						url: "http://nas.local/",
+						scheme: "http",
+					}),
+				).toBe("http");
 			});
 		});
 
@@ -256,7 +272,12 @@ describe("suggestions", () => {
 				const url = "https://github.com";
 
 				expect(
-					suggestionKey({ kind: "url", label: "Go to github.com", url }),
+					suggestionKey({
+						kind: "url",
+						label: "Go to github.com",
+						url,
+						scheme: "https",
+					}),
 				).not.toBe(
 					suggestionKey({
 						kind: "link",

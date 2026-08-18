@@ -3,6 +3,7 @@ import { z } from "zod";
 export type NavigationTarget = {
 	url: string;
 	display: string;
+	scheme: "http" | "https";
 };
 
 /**
@@ -18,19 +19,22 @@ export function resolveNavigationTarget(
 	query: string,
 ): NavigationTarget | null {
 	const trimmed = query.trim();
-	if (!trimmed || /\s/.test(trimmed) || trimmed.startsWith("//")) return null;
+	if (!candidateSchema.safeParse(trimmed).success) return null;
 
 	// An explicit http(s) prefix is a statement of intent, so it skips the
-	// host heuristics below. Any other scheme — javascript:, data:, file: —
-	// falls through to search rather than being followed.
+	// host checks below. Any other scheme — javascript:, data:, file: — falls
+	// through to search rather than being followed.
 	if (HTTP_SCHEME.test(trimmed)) return buildTarget(trimmed);
 	if (OTHER_SCHEME.test(trimmed)) return null;
 
-	const host = authorityHost(trimmed);
-	if (!host || !navigableHostSchema.safeParse(host).success) return null;
+	const host = hostSchema.safeParse(trimmed);
+	if (!host.success) return null;
 
-	return buildTarget(`${schemeFor(host)}://${trimmed}`);
+	return buildTarget(`${schemeFor(host.data)}://${trimmed}`);
 }
+
+/** Non-empty, no whitespace, and not protocol-relative. */
+const candidateSchema = z.string().regex(/^(?!\/\/)\S+$/);
 
 const HTTP_SCHEME = /^https?:\/\//i;
 
@@ -39,43 +43,52 @@ const HTTP_SCHEME = /^https?:\/\//i;
 // out — a bare host with a port is scheme-shaped but isn't a scheme.
 const OTHER_SCHEME = /^[a-z][a-z0-9+.-]*:(?:\/\/|(?!\d))/i;
 
-const ipv4Schema = z.string().ip({ version: "v4" });
-const ipv6Schema = z.string().ip({ version: "v6" });
-
-/** An IPv6 literal in the bracketed form a URL requires: `[::1]`. */
-const bracketedIpv6Schema = z
-	.string()
-	.regex(/^\[.+\]$/)
-	.transform((host) => host.slice(1, -1).toLowerCase())
-	.pipe(ipv6Schema);
-
 /** A dotted hostname whose final label reads like a real TLD. */
 const domainSchema = z
 	.string()
 	.regex(/^[^\s.]+(?:\.[^\s.]+)*\.(?:[a-z]{2,}|xn--[a-z0-9-]+)$/i);
 
 const navigableHostSchema = z.union([
-	ipv4Schema,
-	bracketedIpv6Schema,
+	z.string().ip({ version: "v4" }),
+	z.string().ip({ version: "v6" }),
 	z.literal("localhost"),
 	domainSchema,
 ]);
 
-const loopbackIpv4Schema = ipv4Schema.refine((host) => host.startsWith("127."));
+// An authority is its host plus an optional port, where an IPv6 host is
+// bracketed and so may hold the colons a port would otherwise delimit.
+const AUTHORITY = /^(\[[^\]]+\]|[^:]*)(?::\d+)?$/;
 
-const privateIpv4Schema = ipv4Schema.refine((host) => {
-	const [first, second] = host.split(".").map(Number);
-	if (first === 10) return true;
-	if (first === 192 && second === 168) return true;
-	if (first === 169 && second === 254) return true;
-	return first === 172 && second >= 16 && second <= 31;
-});
+/**
+ * The host a schemeless query points at, lowercased and unbracketed, or a
+ * parse failure when the query isn't somewhere we're willing to navigate.
+ *
+ * Backslashes delimit the authority just as slashes do for http(s), so they
+ * split here too — otherwise the host we check isn't the host we'd reach. An
+ * authority carrying credentials is refused outright: `user:pass@evil.com`
+ * renders as `evil.com` and is a phishing shape worth staying out of.
+ */
+const hostSchema = z
+	.string()
+	.transform((query) => query.split(/[/?#\\]/)[0])
+	.refine((authority) => !authority.includes("@"))
+	.transform((authority) => AUTHORITY.exec(authority)?.[1] ?? "")
+	.transform((host) => host.replace(/^\[|\]$/g, "").toLowerCase())
+	.pipe(navigableHostSchema);
 
-// Loopback (::1), unique local (fc00::/7) and link local (fe80::/10). Matched
-// on the prefix rather than expanded, which is enough to pick a scheme.
-const localIpv6Schema = bracketedIpv6Schema.refine(
-	(host) => host === "::1" || /^f[cd]|^fe[89ab]/.test(host),
-);
+// Loopback, private and link-local ranges. The `.ip()` check has already
+// guaranteed four valid octets, so the prefix is all that's left to match.
+const localIpv4Schema = z
+	.string()
+	.ip({ version: "v4" })
+	.regex(/^(?:10\.|127\.|169\.254\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)/);
+
+// Loopback (::1), unique local (fc00::/7) and link local (fe80::/10), matched
+// on the prefix rather than expanded — enough to pick a scheme.
+const localIpv6Schema = z
+	.string()
+	.ip({ version: "v6" })
+	.regex(/^(?:::1$|f[cd]|fe[89ab])/i);
 
 const localDomainSchema = z
 	.string()
@@ -87,8 +100,7 @@ const localDomainSchema = z
  */
 const localHostSchema = z.union([
 	z.literal("localhost"),
-	loopbackIpv4Schema,
-	privateIpv4Schema,
+	localIpv4Schema,
 	localIpv6Schema,
 	localDomainSchema,
 ]);
@@ -97,51 +109,24 @@ function schemeFor(host: string): "http" | "https" {
 	return localHostSchema.safeParse(host).success ? "http" : "https";
 }
 
-/**
- * The host portion of a schemeless query, with any port stripped. Returns null
- * when the authority carries credentials — `user:pass@evil.com` renders as
- * `evil.com` and is a phishing shape worth refusing.
- */
-function authorityHost(input: string): string | null {
-	// Backslashes delimit the authority just like slashes do for http(s), so
-	// they have to split here too or the parsed host won't be the one we
-	// checked.
-	const [authority = ""] = input.split(/[/?#\\]/);
-	if (!authority || authority.includes("@")) return null;
-
-	if (authority.startsWith("[")) {
-		const close = authority.indexOf("]");
-		if (close === -1) return null;
-		const port = authority.slice(close + 1);
-		if (port && !/^:\d+$/.test(port)) return null;
-		return authority.slice(0, close + 1).toLowerCase();
-	}
-
-	const separator = authority.lastIndexOf(":");
-	if (separator === -1) return authority.toLowerCase();
-	if (!/^\d+$/.test(authority.slice(separator + 1))) return null;
-	return authority.slice(0, separator).toLowerCase();
-}
-
 function buildTarget(candidate: string): NavigationTarget | null {
-	let url: URL;
-	try {
-		url = new URL(candidate);
-	} catch {
-		return null;
-	}
+	if (!URL.canParse(candidate)) return null;
+	const url = new URL(candidate);
 	if (url.protocol !== "http:" && url.protocol !== "https:") return null;
 	if (url.username || url.password) return null;
-	return { url: url.href, display: displayFor(url) };
+	return {
+		url: url.href,
+		display: displayFor(url),
+		scheme: url.protocol === "https:" ? "https" : "http",
+	};
 }
 
 /**
- * https is the assumed default so it stays hidden, while http stays visible —
- * it's a signal the target is local or insecure.
+ * The href without its scheme, which the caller shows separately, and without
+ * a bare trailing slash — `example.com` rather than `https://example.com/`.
  */
 function displayFor(url: URL): string {
-	const shown =
-		url.protocol === "https:" ? url.href.slice("https://".length) : url.href;
+	const shown = url.href.slice(`${url.protocol}//`.length);
 	return shown.endsWith("/") && !url.search && !url.hash
 		? shown.slice(0, -1)
 		: shown;

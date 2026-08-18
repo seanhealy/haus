@@ -5,7 +5,7 @@ import type {
 import { resolveNavigationTarget } from "./navigationTarget";
 
 export type Suggestion =
-	| { kind: "url"; label: string; url: string }
+	| { kind: "url"; label: string; url: string; scheme: "http" | "https" }
 	| { kind: "search"; label: string; query: string }
 	| { kind: "recent"; label: string; query: string }
 	| {
@@ -66,6 +66,7 @@ export function buildSuggestions(
 			kind: "url",
 			label: `Go to ${navigation.display}`,
 			url: navigation.url,
+			scheme: navigation.scheme,
 		};
 		return [urlOption, searchOption, ...linkMatches, ...recentMatches];
 	}
@@ -76,6 +77,9 @@ export function buildSuggestions(
 export function metaLabel(suggestion: Suggestion): string | null {
 	if (suggestion.kind === "recent") return "Recent search";
 	if (suggestion.kind === "link") return suggestion.section || "Link";
+	// The scheme is the one thing about a typed URL worth flagging before it
+	// is followed, and the kicker is already where a row says what it is.
+	if (suggestion.kind === "url") return suggestion.scheme;
 	return null;
 }
 
