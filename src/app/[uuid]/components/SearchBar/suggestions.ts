@@ -58,8 +58,6 @@ export function buildSuggestions(
 		query: trimmed,
 	};
 
-	// A query that reads as a URL leads with the site, and pairs it with the
-	// search row so the two readings of what was typed sit next to each other.
 	const navigation = resolveNavigationTarget(trimmed);
 	if (navigation) {
 		const urlOption: Suggestion = {
