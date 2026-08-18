@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 /** The host a schemeless query points at, if it is one we'll navigate to. */
-export function navigableHost(query: string): string | null {
+export function navigableHost(query: string): string | undefined {
 	const host = navigableHostSchema.safeParse(query);
-	return host.success ? host.data : null;
+	return host.success ? host.data : undefined;
 }
 
 /**

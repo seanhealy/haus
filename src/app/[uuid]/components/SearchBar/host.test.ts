@@ -35,7 +35,7 @@ describe("host", () => {
 
 		describe("with credentials in the authority", () => {
 			it("reads nothing", () => {
-				expect(navigableHost("user:pass@example.com")).toBeNull();
+				expect(navigableHost("user:pass@example.com")).toBeUndefined();
 			});
 		});
 
@@ -47,13 +47,13 @@ describe("host", () => {
 
 		describe("with a single word", () => {
 			it("reads nothing", () => {
-				expect(navigableHost("cats")).toBeNull();
+				expect(navigableHost("cats")).toBeUndefined();
 			});
 		});
 
 		describe("with an incomplete IPv4 address", () => {
 			it("reads nothing rather than expanding it", () => {
-				expect(navigableHost("192.168.1")).toBeNull();
+				expect(navigableHost("192.168.1")).toBeUndefined();
 			});
 		});
 	});

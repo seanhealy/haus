@@ -9,7 +9,7 @@ describe("navigationTarget", () => {
 	describe("resolveNavigationTarget()", () => {
 		describe("with an empty query", () => {
 			it("resolves nothing", () => {
-				expect(resolveNavigationTarget("   ")).toBeNull();
+				expect(resolveNavigationTarget("   ")).toBeUndefined();
 			});
 		});
 
@@ -35,25 +35,27 @@ describe("navigationTarget", () => {
 				"mailto:someone@example.com",
 				"ftp://example.com",
 			])("resolves nothing for %s", (query) => {
-				expect(resolveNavigationTarget(query)).toBeNull();
+				expect(resolveNavigationTarget(query)).toBeUndefined();
 			});
 		});
 
 		describe("with a protocol-relative query", () => {
 			it("resolves nothing", () => {
-				expect(resolveNavigationTarget("//example.com")).toBeNull();
+				expect(resolveNavigationTarget("//example.com")).toBeUndefined();
 			});
 		});
 
 		describe("with credentials in the authority", () => {
 			it("resolves nothing", () => {
-				expect(resolveNavigationTarget("user:pass@example.com")).toBeNull();
+				expect(
+					resolveNavigationTarget("user:pass@example.com"),
+				).toBeUndefined();
 			});
 		});
 
 		describe("when the query contains whitespace", () => {
 			it("resolves nothing", () => {
-				expect(resolveNavigationTarget("example.com is down")).toBeNull();
+				expect(resolveNavigationTarget("example.com is down")).toBeUndefined();
 			});
 		});
 
@@ -79,19 +81,19 @@ describe("navigationTarget", () => {
 
 		describe("with a single word", () => {
 			it("resolves nothing", () => {
-				expect(resolveNavigationTarget("cats")).toBeNull();
+				expect(resolveNavigationTarget("cats")).toBeUndefined();
 			});
 		});
 
 		describe("with a word carrying a port", () => {
 			it("resolves nothing", () => {
-				expect(resolveNavigationTarget("myserver:8080")).toBeNull();
+				expect(resolveNavigationTarget("myserver:8080")).toBeUndefined();
 			});
 		});
 
 		describe("with a dotted query whose last label is not a TLD", () => {
 			it("resolves nothing", () => {
-				expect(resolveNavigationTarget("version.2")).toBeNull();
+				expect(resolveNavigationTarget("version.2")).toBeUndefined();
 			});
 		});
 
@@ -115,19 +117,19 @@ describe("navigationTarget", () => {
 
 		describe("with an incomplete IPv4 address", () => {
 			it("resolves nothing rather than expanding it", () => {
-				expect(resolveNavigationTarget("192.168.1")).toBeNull();
+				expect(resolveNavigationTarget("192.168.1")).toBeUndefined();
 			});
 		});
 
 		describe("with hexadecimal IPv4 octets", () => {
 			it("resolves nothing rather than expanding them", () => {
-				expect(resolveNavigationTarget("0x7f.1")).toBeNull();
+				expect(resolveNavigationTarget("0x7f.1")).toBeUndefined();
 			});
 		});
 
 		describe("with an out of range IPv4 octet", () => {
 			it("resolves nothing", () => {
-				expect(resolveNavigationTarget("999.1.1.1")).toBeNull();
+				expect(resolveNavigationTarget("999.1.1.1")).toBeUndefined();
 			});
 		});
 
@@ -145,13 +147,13 @@ describe("navigationTarget", () => {
 
 		describe("with a malformed bracketed IPv6 address", () => {
 			it("resolves nothing", () => {
-				expect(resolveNavigationTarget("[::zz1]")).toBeNull();
+				expect(resolveNavigationTarget("[::zz1]")).toBeUndefined();
 			});
 		});
 
 		describe("with an unbracketed IPv6 address", () => {
 			it("resolves nothing", () => {
-				expect(resolveNavigationTarget("2001:db8::1")).toBeNull();
+				expect(resolveNavigationTarget("2001:db8::1")).toBeUndefined();
 			});
 		});
 
