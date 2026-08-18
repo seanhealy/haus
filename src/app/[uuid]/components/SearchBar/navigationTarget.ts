@@ -7,13 +7,10 @@ export type NavigationTarget = {
 };
 
 /**
- * Resolves a query the user typed into a site to navigate to, or null when it
- * reads as a search instead.
- *
- * Detection runs against the raw text rather than a parsed URL on purpose: the
- * URL parser happily rewrites `192.168.1` into `192.168.0.1` and `0x7f.1` into
- * `127.0.0.1`, so parsing first would send people somewhere they never typed.
- * `new URL()` is only used at the end, to normalise a target we already trust.
+ * Detection runs against the raw text rather than a parsed URL: the parser
+ * rewrites `192.168.1` into `192.168.0.1` and `0x7f.1` into `127.0.0.1`, so
+ * parsing first would send people somewhere they never typed. `new URL()` runs
+ * only at the end, to normalise a target that already passed the checks.
  */
 export function resolveNavigationTarget(
 	query: string,
@@ -21,9 +18,7 @@ export function resolveNavigationTarget(
 	const trimmed = query.trim();
 	if (!candidateSchema.safeParse(trimmed).success) return null;
 
-	// An explicit http(s) prefix is a statement of intent, so it skips the
-	// host checks below. Any other scheme — javascript:, data:, file: — falls
-	// through to search rather than being followed.
+	// An explicit scheme is a statement of intent, so it skips the host checks.
 	if (HTTP_SCHEME.test(trimmed)) return buildTarget(trimmed);
 	if (OTHER_SCHEME.test(trimmed)) return null;
 
@@ -38,9 +33,8 @@ const candidateSchema = z.string().regex(/^(?!\/\/)\S+$/);
 
 const HTTP_SCHEME = /^https?:\/\//i;
 
-// Any other scheme, either with an authority (`ftp://`) or opaque
-// (`javascript:`). The digit guard keeps `localhost:3000` and `10.0.0.5:8080`
-// out — a bare host with a port is scheme-shaped but isn't a scheme.
+// The digit guard keeps `localhost:3000` and `10.0.0.5:8080` out — a bare host
+// with a port is scheme-shaped but isn't a scheme.
 const OTHER_SCHEME = /^[a-z][a-z0-9+.-]*:(?:\/\/|(?!\d))/i;
 
 /** A dotted hostname whose final label reads like a real TLD. */
@@ -55,18 +49,13 @@ const navigableHostSchema = z.union([
 	domainSchema,
 ]);
 
-// An authority is its host plus an optional port, where an IPv6 host is
-// bracketed and so may hold the colons a port would otherwise delimit.
+// An IPv6 host is bracketed, so it can hold the colons a port would delimit.
 const AUTHORITY = /^(\[[^\]]+\]|[^:]*)(?::\d+)?$/;
 
 /**
- * The host a schemeless query points at, lowercased and unbracketed, or a
- * parse failure when the query isn't somewhere we're willing to navigate.
- *
- * Backslashes delimit the authority just as slashes do for http(s), so they
- * split here too — otherwise the host we check isn't the host we'd reach. An
- * authority carrying credentials is refused outright: `user:pass@evil.com`
- * renders as `evil.com` and is a phishing shape worth staying out of.
+ * Backslashes delimit the authority just as slashes do, so they split here too
+ * — otherwise the host we check isn't the host we'd reach. Credentials are
+ * refused outright: `user:pass@evil.com` renders as `evil.com`.
  */
 const hostSchema = z
 	.string()
@@ -76,15 +65,15 @@ const hostSchema = z
 	.transform((host) => host.replace(/^\[|\]$/g, "").toLowerCase())
 	.pipe(navigableHostSchema);
 
-// Loopback, private and link-local ranges. The `.ip()` check has already
-// guaranteed four valid octets, so the prefix is all that's left to match.
+// Loopback, private and link-local ranges. `.ip()` has already guaranteed four
+// valid octets, so only the prefix is left to match.
 const localIpv4Schema = z
 	.string()
 	.ip({ version: "v4" })
 	.regex(/^(?:10\.|127\.|169\.254\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)/);
 
 // Loopback (::1), unique local (fc00::/7) and link local (fe80::/10), matched
-// on the prefix rather than expanded — enough to pick a scheme.
+// on the prefix rather than expanded.
 const localIpv6Schema = z
 	.string()
 	.ip({ version: "v6" })
@@ -96,7 +85,7 @@ const localDomainSchema = z
 
 /**
  * Hosts that rarely speak TLS, so they get http. Everything else gets https —
- * the browser's own upgrade and HSTS handle the public stragglers.
+ * HSTS and the browser's own upgrade handle the public stragglers.
  */
 const localHostSchema = z.union([
 	z.literal("localhost"),
@@ -121,10 +110,7 @@ function buildTarget(candidate: string): NavigationTarget | null {
 	};
 }
 
-/**
- * The href without its scheme, which the caller shows separately, and without
- * a bare trailing slash — `example.com` rather than `https://example.com/`.
- */
+/** `example.com` rather than `https://example.com/`; the scheme is shown separately. */
 function displayFor(url: URL): string {
 	const shown = url.href.slice(`${url.protocol}//`.length);
 	return shown.endsWith("/") && !url.search && !url.hash

@@ -77,8 +77,6 @@ export function buildSuggestions(
 export function metaLabel(suggestion: Suggestion): string | null {
 	if (suggestion.kind === "recent") return "Recent search";
 	if (suggestion.kind === "link") return suggestion.section || "Link";
-	// The scheme is the one thing about a typed URL worth flagging before it
-	// is followed, and the kicker is already where a row says what it is.
 	if (suggestion.kind === "url") return suggestion.scheme;
 	return null;
 }
