@@ -67,7 +67,7 @@ export function SearchBar({ config, sections, uuid }: Props) {
 
 	function handleSelect(suggestion: Suggestion | null) {
 		if (!suggestion) return;
-		if (suggestion.kind === "link") {
+		if (suggestion.kind === "link" || suggestion.kind === "url") {
 			window.location.assign(suggestion.url);
 			return;
 		}
@@ -112,19 +112,17 @@ export function SearchBar({ config, sections, uuid }: Props) {
 										: suggestion.kind === "search"
 											? { scale: SEARCH_ICON_SCALE }
 											: undefined;
+								const iconUrl =
+									suggestion.kind === "link" || suggestion.kind === "url"
+										? suggestion.url
+										: config.url;
 								return (
 									<ComboboxOption
 										key={suggestionKey(suggestion)}
 										value={suggestion}
 										className={styles.option}
 									>
-										<QuickLinkIcon
-											url={
-												suggestion.kind === "link" ? suggestion.url : config.url
-											}
-											icon={icon}
-											size={ICON_SIZE}
-										/>
+										<QuickLinkIcon url={iconUrl} icon={icon} size={ICON_SIZE} />
 										<span className={styles.optionText}>
 											{meta ? (
 												<span className={styles.optionMeta}>{meta}</span>

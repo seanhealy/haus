@@ -2,8 +2,10 @@ import type {
 	QuickLinkIcon as QuickLinkIconConfig,
 	Section,
 } from "@/app/types";
+import { resolveNavigationTarget } from "./navigationTarget";
 
 export type Suggestion =
+	| { kind: "url"; label: string; url: string }
 	| { kind: "search"; label: string; query: string }
 	| { kind: "recent"; label: string; query: string }
 	| {
@@ -56,6 +58,18 @@ export function buildSuggestions(
 		query: trimmed,
 	};
 
+	// A query that reads as a URL leads with the site, and pairs it with the
+	// search row so the two readings of what was typed sit next to each other.
+	const navigation = resolveNavigationTarget(trimmed);
+	if (navigation) {
+		const urlOption: Suggestion = {
+			kind: "url",
+			label: `Go to ${navigation.display}`,
+			url: navigation.url,
+		};
+		return [urlOption, searchOption, ...linkMatches, ...recentMatches];
+	}
+
 	return [...linkMatches, ...recentMatches, searchOption];
 }
 
@@ -66,7 +80,7 @@ export function metaLabel(suggestion: Suggestion): string | null {
 }
 
 export function suggestionKey(suggestion: Suggestion): string {
-	return suggestion.kind === "link"
-		? `link:${suggestion.id}`
-		: `${suggestion.kind}:${suggestion.query}`;
+	if (suggestion.kind === "link") return `link:${suggestion.id}`;
+	if (suggestion.kind === "url") return `url:${suggestion.url}`;
+	return `${suggestion.kind}:${suggestion.query}`;
 }
