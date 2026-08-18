@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveNavigationTarget } from "./navigationTarget";
+import { resolveNavigationTarget } from "./resolveNavigationTarget";
 
 function urlFor(query: string): string | null {
 	return resolveNavigationTarget(query)?.url ?? null;

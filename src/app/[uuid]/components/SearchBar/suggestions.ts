@@ -2,7 +2,7 @@ import type {
 	QuickLinkIcon as QuickLinkIconConfig,
 	Section,
 } from "@/app/types";
-import { resolveNavigationTarget, type Scheme } from "./navigationTarget";
+import { resolveNavigationTarget, type Scheme } from "./navigation";
 
 export type Suggestion =
 	| { kind: "url"; label: string; url: string; scheme: Scheme }

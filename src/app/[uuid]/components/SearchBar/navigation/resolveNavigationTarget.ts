@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { isLocalHost, navigableHost } from "./host";
+import { isLocalHost } from "./isLocalHost";
+import { navigableHost } from "./navigableHost";
 
 export type Scheme = "http" | "https";
 
