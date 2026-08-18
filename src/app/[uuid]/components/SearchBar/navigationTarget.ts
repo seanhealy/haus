@@ -31,8 +31,9 @@ export function resolveNavigationTarget(
 
 /**
  * The URL a query points at, with a scheme chosen for it when it named none. A
- * typed scheme is a statement of intent, so only http(s) is ours to follow; a
- * bare host gets http when it's local and https otherwise.
+ * typed scheme is a statement of intent, so only http(s) is ours to follow.
+ * Bare local hosts rarely speak TLS so they get http; everything else gets
+ * https, and HSTS and the browser's own upgrade handle the stragglers.
  */
 function candidateUrl(query: string): string | undefined {
 	if (TYPED_SCHEME.test(query)) {
@@ -57,14 +58,17 @@ function targetFrom(
 ): NavigationTarget | undefined {
 	if (!candidate || !URL.canParse(candidate)) return undefined;
 	const url = new URL(candidate);
-	if (url.protocol !== "http:" && url.protocol !== "https:") return undefined;
+	const scheme = SCHEME_BY_PROTOCOL[url.protocol];
+	if (!scheme) return undefined;
 	if (url.username || url.password) return undefined;
-	return {
-		url: url.href,
-		display: displayFor(url),
-		scheme: url.protocol === "https:" ? "https" : "http",
-	};
+	return { url: url.href, display: displayFor(url), scheme };
 }
+
+/** The protocols we follow, and the scheme each one reports. */
+const SCHEME_BY_PROTOCOL: Record<string, Scheme> = {
+	"http:": "http",
+	"https:": "https",
+};
 
 /** `example.com` rather than `https://example.com/`; the scheme shows separately. */
 function displayFor(url: URL): string {

@@ -261,7 +261,7 @@ describe("suggestions", () => {
 			it("has no kicker", () => {
 				expect(
 					metaLabel({ kind: "search", label: "x", query: "x" }),
-				).toBeNull();
+				).toBeUndefined();
 			});
 		});
 	});

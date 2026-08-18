@@ -13,7 +13,11 @@ import {
 	useState,
 } from "react";
 import { QuickLinkIcon } from "@/app/components/QuickLinkIcon";
-import type { SearchConfig, Section } from "@/app/types";
+import type {
+	QuickLinkIcon as QuickLinkIconConfig,
+	SearchConfig,
+	Section,
+} from "@/app/types";
 import { readRecents, recentsStorageKey, rememberSearch } from "./recents";
 import styles from "./styles.module.css";
 import {
@@ -106,23 +110,14 @@ export function SearchBar({ config, sections, uuid }: Props) {
 						<ComboboxOptions anchor="bottom start" className={styles.options}>
 							{suggestions.map((suggestion) => {
 								const meta = metaLabel(suggestion);
-								const icon =
-									suggestion.kind === "link"
-										? suggestion.icon
-										: suggestion.kind === "search"
-											? { scale: SEARCH_ICON_SCALE }
-											: undefined;
-								const iconUrl =
-									suggestion.kind === "link" || suggestion.kind === "url"
-										? suggestion.url
-										: config.url;
+								const { url, icon } = iconFor(suggestion, config.url);
 								return (
 									<ComboboxOption
 										key={suggestionKey(suggestion)}
 										value={suggestion}
 										className={styles.option}
 									>
-										<QuickLinkIcon url={iconUrl} icon={icon} size={ICON_SIZE} />
+										<QuickLinkIcon url={url} icon={icon} size={ICON_SIZE} />
 										<span className={styles.optionText}>
 											{meta ? (
 												<span className={styles.optionMeta}>{meta}</span>
@@ -140,6 +135,21 @@ export function SearchBar({ config, sections, uuid }: Props) {
 			</Combobox>
 		</div>
 	);
+}
+
+/** The icon a row shows, and the url its favicon is drawn from. */
+function iconFor(
+	suggestion: Suggestion,
+	searchUrl: string,
+): { url: string; icon?: QuickLinkIconConfig } {
+	if (suggestion.kind === "link") {
+		return { url: suggestion.url, icon: suggestion.icon };
+	}
+	if (suggestion.kind === "url") return { url: suggestion.url };
+	if (suggestion.kind === "search") {
+		return { url: searchUrl, icon: { scale: SEARCH_ICON_SCALE } };
+	}
+	return { url: searchUrl };
 }
 
 function wrapArrowNavigation(

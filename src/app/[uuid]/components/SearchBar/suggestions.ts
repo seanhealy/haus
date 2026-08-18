@@ -58,25 +58,28 @@ export function buildSuggestions(
 		query: trimmed,
 	};
 
-	const navigation = resolveNavigationTarget(trimmed);
-	if (navigation) {
-		const urlOption: Suggestion = {
-			kind: "url",
-			label: `Go to ${navigation.display}`,
-			url: navigation.url,
-			scheme: navigation.scheme,
-		};
-		return [urlOption, searchOption, ...linkMatches, ...recentMatches];
-	}
-
-	return [...linkMatches, ...recentMatches, searchOption];
+	const urlOption = urlSuggestion(trimmed);
+	return urlOption
+		? [urlOption, searchOption, ...linkMatches, ...recentMatches]
+		: [...linkMatches, ...recentMatches, searchOption];
 }
 
-export function metaLabel(suggestion: Suggestion): string | null {
+function urlSuggestion(query: string): Suggestion | undefined {
+	const navigation = resolveNavigationTarget(query);
+	if (!navigation) return undefined;
+	return {
+		kind: "url",
+		label: `Go to ${navigation.display}`,
+		url: navigation.url,
+		scheme: navigation.scheme,
+	};
+}
+
+export function metaLabel(suggestion: Suggestion): string | undefined {
 	if (suggestion.kind === "recent") return "Recent search";
 	if (suggestion.kind === "link") return suggestion.section || "Link";
 	if (suggestion.kind === "url") return suggestion.scheme;
-	return null;
+	return undefined;
 }
 
 export function suggestionKey(suggestion: Suggestion): string {

@@ -6,10 +6,7 @@ export function navigableHost(query: string): string | undefined {
 	return host.success ? host.data : undefined;
 }
 
-/**
- * Hosts that rarely speak TLS, and so are reached over http. HSTS and the
- * browser's own upgrade handle the public stragglers.
- */
+/** Loopback, private ranges, and the domain suffixes reserved for local use. */
 export function isLocalHost(host: string): boolean {
 	return localHostSchema.safeParse(host).success;
 }
