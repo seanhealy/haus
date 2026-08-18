@@ -25,18 +25,26 @@ export function resolveNavigationTarget(
 		.refine((query) => !query.startsWith("//"))
 		.safeParse(query);
 	if (!parsed.success) return undefined;
-	const trimmed = parsed.data;
 
-	// A typed scheme is a statement of intent; only http(s) is ours to follow.
-	if (TYPED_SCHEME.test(trimmed)) {
-		return HTTP_SCHEME.test(trimmed) ? targetFrom(trimmed) : undefined;
+	const candidate = candidateUrl(parsed.data);
+	return candidate ? targetFrom(candidate) : undefined;
+}
+
+/**
+ * The URL a query points at, with a scheme chosen for it when it named none. A
+ * typed scheme is a statement of intent, so only http(s) is ours to follow; a
+ * bare host gets http when it's local and https otherwise.
+ */
+function candidateUrl(query: string): string | undefined {
+	if (TYPED_SCHEME.test(query)) {
+		return HTTP_SCHEME.test(query) ? query : undefined;
 	}
 
-	const host = navigableHost(trimmed);
+	const host = navigableHost(query);
 	if (!host) return undefined;
 
 	const scheme = isLocalHost(host) ? "http" : "https";
-	return targetFrom(`${scheme}://${trimmed}`);
+	return `${scheme}://${query}`;
 }
 
 // The digit guard keeps `localhost:3000` and `10.0.0.5:8080` out — a bare host
