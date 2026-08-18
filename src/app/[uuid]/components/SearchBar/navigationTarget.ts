@@ -1,10 +1,16 @@
 import { z } from "zod";
-import { schemeFor } from "./hostScheme";
+import {
+	hasScheme,
+	isSupportedScheme,
+	type Scheme,
+	schemeFor,
+	schemeOf,
+} from "./scheme";
 
 export type NavigationTarget = {
 	url: string;
 	display: string;
-	scheme: "http" | "https";
+	scheme: Scheme;
 };
 
 /**
@@ -20,19 +26,13 @@ export function resolveNavigationTarget(
 	if (!trimmed || /\s/.test(trimmed) || trimmed.startsWith("//")) return null;
 
 	// A typed scheme is a statement of intent; only http(s) is ours to follow.
-	if (SCHEME.test(trimmed)) {
-		return HTTP_SCHEME.test(trimmed) ? targetFrom(trimmed) : null;
+	if (hasScheme(trimmed)) {
+		return isSupportedScheme(trimmed) ? targetFrom(trimmed) : null;
 	}
 
 	const host = navigableHost(trimmed);
 	return host ? targetFrom(`${schemeFor(host)}://${trimmed}`) : null;
 }
-
-const HTTP_SCHEME = /^https?:\/\//i;
-
-// The digit guard keeps `localhost:3000` and `10.0.0.5:8080` out — a bare host
-// with a port is scheme-shaped but isn't a scheme.
-const SCHEME = /^[a-z][a-z0-9+.-]*:(?:\/\/|(?!\d))/i;
 
 /** The host a schemeless query points at, if it is one we'll navigate to. */
 function navigableHost(query: string): string | null {
@@ -74,13 +74,10 @@ const navigableHostSchema = hostSchema.pipe(
 function targetFrom(candidate: string): NavigationTarget | null {
 	if (!URL.canParse(candidate)) return null;
 	const url = new URL(candidate);
-	if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+	const scheme = schemeOf(url);
+	if (!scheme) return null;
 	if (url.username || url.password) return null;
-	return {
-		url: url.href,
-		display: displayFor(url),
-		scheme: url.protocol === "https:" ? "https" : "http",
-	};
+	return { url: url.href, display: displayFor(url), scheme };
 }
 
 /** `example.com` rather than `https://example.com/`; the scheme shows separately. */

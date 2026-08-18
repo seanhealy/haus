@@ -3,9 +3,10 @@ import type {
 	Section,
 } from "@/app/types";
 import { resolveNavigationTarget } from "./navigationTarget";
+import type { Scheme } from "./scheme";
 
 export type Suggestion =
-	| { kind: "url"; label: string; url: string; scheme: "http" | "https" }
+	| { kind: "url"; label: string; url: string; scheme: Scheme }
 	| { kind: "search"; label: string; query: string }
 	| { kind: "recent"; label: string; query: string }
 	| {
