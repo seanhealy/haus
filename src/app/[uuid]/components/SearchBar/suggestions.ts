@@ -2,8 +2,10 @@ import type {
 	QuickLinkIcon as QuickLinkIconConfig,
 	Section,
 } from "@/app/types";
+import { resolveNavigationTarget, type Scheme } from "./navigation";
 
 export type Suggestion =
+	| { kind: "url"; label: string; url: string; scheme: Scheme }
 	| { kind: "search"; label: string; query: string }
 	| { kind: "recent"; label: string; query: string }
 	| {
@@ -56,17 +58,32 @@ export function buildSuggestions(
 		query: trimmed,
 	};
 
-	return [...linkMatches, ...recentMatches, searchOption];
+	const urlOption = urlSuggestion(trimmed);
+	return urlOption
+		? [urlOption, searchOption, ...linkMatches, ...recentMatches]
+		: [...linkMatches, ...recentMatches, searchOption];
 }
 
-export function metaLabel(suggestion: Suggestion): string | null {
+function urlSuggestion(query: string): Suggestion | undefined {
+	const navigation = resolveNavigationTarget(query);
+	if (!navigation) return undefined;
+	return {
+		kind: "url",
+		label: `Go to ${navigation.display}`,
+		url: navigation.url,
+		scheme: navigation.scheme,
+	};
+}
+
+export function metaLabel(suggestion: Suggestion): string | undefined {
 	if (suggestion.kind === "recent") return "Recent search";
 	if (suggestion.kind === "link") return suggestion.section || "Link";
-	return null;
+	if (suggestion.kind === "url") return suggestion.scheme;
+	return undefined;
 }
 
 export function suggestionKey(suggestion: Suggestion): string {
-	return suggestion.kind === "link"
-		? `link:${suggestion.id}`
-		: `${suggestion.kind}:${suggestion.query}`;
+	if (suggestion.kind === "link") return `link:${suggestion.id}`;
+	if (suggestion.kind === "url") return `url:${suggestion.url}`;
+	return `${suggestion.kind}:${suggestion.query}`;
 }

@@ -118,6 +118,68 @@ describe("suggestions", () => {
 			});
 		});
 
+		describe("when the query reads as a URL", () => {
+			const sections = [
+				makeSection({ links: [makeLink({ label: "example.com docs" })] }),
+			];
+			const suggestions = buildSuggestions(
+				"example.com",
+				["example.com"],
+				sections,
+			);
+
+			it("leads with the site", () => {
+				expect(suggestions[0]).toEqual({
+					kind: "url",
+					label: "Go to example.com",
+					url: "https://example.com/",
+					scheme: "https",
+				});
+			});
+
+			it("offers the search row second", () => {
+				expect(suggestions[1]).toMatchObject({ kind: "search" });
+			});
+
+			it("keeps the remaining suggestions below", () => {
+				expect(
+					suggestions.slice(2).map((suggestion) => suggestion.kind),
+				).toEqual(["link"]);
+			});
+
+			it("offers the search row only once", () => {
+				const searches = suggestions.filter(
+					(suggestion) => suggestion.kind === "search",
+				);
+
+				expect(searches).toHaveLength(1);
+			});
+		});
+
+		describe("when the query reads as a local address", () => {
+			it("leads with the site over http", () => {
+				expect(buildSuggestions("192.168.1.10:8080", [], [])[0]).toEqual({
+					kind: "url",
+					label: "Go to 192.168.1.10:8080",
+					url: "http://192.168.1.10:8080/",
+					scheme: "http",
+				});
+			});
+		});
+
+		describe("when the query does not read as a URL", () => {
+			it("keeps the search row last", () => {
+				const sections = [
+					makeSection({ links: [makeLink({ label: "GitHub" })] }),
+				];
+				const kinds = buildSuggestions("git", [], sections).map(
+					(suggestion) => suggestion.kind,
+				);
+
+				expect(kinds).toEqual(["link", "search"]);
+			});
+		});
+
 		describe("when a recent duplicates a link label", () => {
 			it("drops the recent in favour of the link", () => {
 				const sections = [
@@ -169,16 +231,65 @@ describe("suggestions", () => {
 			});
 		});
 
+		describe("with a secure url row", () => {
+			it("reads 'https'", () => {
+				expect(
+					metaLabel({
+						kind: "url",
+						label: "Go to example.com",
+						url: "https://example.com/",
+						scheme: "https",
+					}),
+				).toBe("https");
+			});
+		});
+
+		describe("with an insecure url row", () => {
+			it("reads 'http'", () => {
+				expect(
+					metaLabel({
+						kind: "url",
+						label: "Go to nas.local",
+						url: "http://nas.local/",
+						scheme: "http",
+					}),
+				).toBe("http");
+			});
+		});
+
 		describe("with the search row", () => {
 			it("has no kicker", () => {
 				expect(
 					metaLabel({ kind: "search", label: "x", query: "x" }),
-				).toBeNull();
+				).toBeUndefined();
 			});
 		});
 	});
 
 	describe("suggestionKey()", () => {
+		describe("with a url row and a link sharing a url", () => {
+			it("keys them apart", () => {
+				const url = "https://github.com";
+
+				expect(
+					suggestionKey({
+						kind: "url",
+						label: "Go to github.com",
+						url,
+						scheme: "https",
+					}),
+				).not.toBe(
+					suggestionKey({
+						kind: "link",
+						id: "link-1",
+						label: "GitHub",
+						url,
+						section: "Dev",
+					}),
+				);
+			});
+		});
+
 		describe("with two links sharing a url", () => {
 			it("keys them apart by id", () => {
 				const base = {
