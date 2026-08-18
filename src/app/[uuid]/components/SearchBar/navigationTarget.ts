@@ -18,7 +18,12 @@ export type NavigationTarget = {
 export function resolveNavigationTarget(
 	query: string,
 ): NavigationTarget | undefined {
-	const parsed = querySchema.safeParse(query);
+	const parsed = z
+		.string()
+		.transform((query) => query.trim())
+		.refine((query) => /^\S+$/.test(query))
+		.refine((query) => !query.startsWith("//"))
+		.safeParse(query);
 	if (!parsed.success) return undefined;
 	const trimmed = parsed.data;
 
@@ -33,13 +38,6 @@ export function resolveNavigationTarget(
 	const scheme = isLocalHost(host) ? "http" : "https";
 	return targetFrom(`${scheme}://${trimmed}`);
 }
-
-/** Trimmed, and shaped like something worth resolving at all. */
-const querySchema = z
-	.string()
-	.transform((query) => query.trim())
-	.refine((query) => /^\S+$/.test(query))
-	.refine((query) => !query.startsWith("//"));
 
 // The digit guard keeps `localhost:3000` and `10.0.0.5:8080` out — a bare host
 // with a port is scheme-shaped but isn't a scheme.
